@@ -35,19 +35,20 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await expect(page.locator('.room-dog')).toHaveCount(8);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.getByRole('button',{name:'ソラをなでる'}).click();
  await page.screenshot({path:`test-results/eight-dogs-${info.project.name}.png`,fullPage:true});
- await page.locator('.feature-link').first().click();
+ // The room has a single entry point: the navigation.
+ await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:info.project.name==='mobile'?'お部屋':'お部屋づくり',exact:true}).click();
  await page.locator('.shop-item').filter({hasText:'ふかふかベッド'}).getByRole('button').click();
  await expect(page.locator('.placed-furniture')).toHaveCount(1);
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'閉じる',exact:true}).click();
- // Album detail exposes a real partner selector from the bottom tabs.
- await page.locator('.mobile-nav').getByRole('button',{name:'なかま',exact:true}).click();
+ // Album detail exposes a real partner selector.
+ await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:info.project.name==='mobile'?'なかま':'なかまたち',exact:true}).click();
  await page.locator('.dog-card').filter({hasText:'レオ'}).click();await expect(page.locator('.detail-content>p').first()).toHaveText('コーギー');
  await page.getByRole('button',{name:'パートナーにする'}).click();
  await page.locator('.dog-card').filter({hasText:'レオ'}).click();
  await page.getByRole('button',{name:'着せ替える',exact:false}).click();
  await page.locator('.shop-item').filter({hasText:'麦わら帽子'}).getByRole('button').click();
  await expect(page.locator('.dress-preview .outfit-hat')).toBeVisible();
- await page.locator('.mobile-nav').getByRole('button',{name:'ミッション',exact:true}).click();
+ await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:'ミッション',exact:true}).click();
  await page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button').click();
  await expect(page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button')).toBeDisabled();
  await page.reload();
