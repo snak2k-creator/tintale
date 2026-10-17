@@ -1,5 +1,5 @@
 /* A compact, thumb-first board and larger touch targets, used at every width. */
-@media all {
+@media (max-width: 720px) {
   :root { font-size: 15px; }
   body { min-width: 320px; }
   main { padding: 18px 14px calc(104px + env(safe-area-inset-bottom)); }
@@ -93,10 +93,9 @@
 .pour-source { filter: drop-shadow(0 8px 6px #755a3833); }
 .pour-layer .pour-stream { position: absolute; inset: 0; width: 100%; height: 100%; animation: none; }
 
-/* Phone-app frame: one column and bottom tabs at every screen width. */
-html { background: #ebe5d7; }
-#root { max-width: 520px; min-height: 100dvh; margin: 0 auto; background: #f8f5ed; box-shadow: 0 0 0 1px #e2dac8; }
-.sidebar, .breadcrumb { display: none; }
-.workspace { margin-left: 0; }
-.mobile-logo { display: block; }
-.mobile-nav { max-width: 520px; margin: 0 auto; }
+/* Larger boards on desktop: 5 or 6 bottles per row so the puzzle fits on one screen. */
+@media (min-width: 721px) {
+  .bottles-9 .bottle, .bottles-10 .bottle, .bottles-11 .bottle, .bottles-12 .bottle { width: 66px; }
+  .bottle-grid.bottles-9, .bottle-grid.bottles-10 { max-width: 540px; gap: 24px; }
+  .bottle-grid.bottles-11, .bottle-grid.bottles-12 { max-width: 630px; gap: 24px; }
+}
