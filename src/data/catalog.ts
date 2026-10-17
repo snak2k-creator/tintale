@@ -9,8 +9,9 @@ export const DOGS = [
  {id:'moka',name:'モカ',breed:'ポメラニアン',stage:40,index:7,personality:'ふわふわ、人懐っこい天使。',story:'ソラのバンダナにそっと鼻を寄せたモカ。8匹みんなの暮らしが始まります。',action:'ミルと仲良くお昼寝',color:'#deb99c'},
 ] as const;
 export type DogId = typeof DOGS[number]['id'];
-export const COLORS=['#e5484d','#2f6fd6','#f5b800','#3a9a3a','#8a4fd0','#ec5fa8','#2ec4f0'];
-export const SYMBOLS=['●','◆','★','▲','✚','♥','⬟'];
+export const COLORS=['#f27b7f','#5f8fe3','#f7cf55','#68bd6c','#a387e3','#f59ccb','#67d0f2','#f8a65e','#b98d68'];
+export const COLOR_NAMES=['赤','青','黄','緑','紫','ピンク','水色','オレンジ','茶'];
+export const SYMBOLS=['●','◆','★','▲','✚','♥','⬟','■','✿'];
 export const ITEMS = [
  {id:'ribbon',name:'赤いリボン',kind:'outfit',price:50,icon:'🎀'},
  {id:'collar',name:'青い首輪',kind:'outfit',price:50,icon:'🔹'},
