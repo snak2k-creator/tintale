@@ -55,6 +55,14 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await expect(page.locator('.room-dog')).toHaveCount(8);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+test('bottle tips toward the target while the liquid stream pours',async({page})=>{
+ await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();await page.getByRole('button',{name:/チュートリアル 2色/}).click();
+ const [from,to]=stages[0].solution[0],source=page.locator(`[data-bottle="${from}"]`),target=page.locator(`[data-bottle="${to}"]`);
+ const [sourceX,targetX]=await Promise.all([source.evaluate(el=>{const r=el.querySelector('svg')!.getBoundingClientRect();return r.x+r.width/2}),target.evaluate(el=>{const r=el.querySelector('svg')!.getBoundingClientRect();return r.x+r.width/2})]);
+ const direction=targetX<sourceX?'left':'right';await source.click();await target.click();
+ await expect(source).toHaveClass(/pouring-source/);await expect(source).toHaveAttribute('data-pour-direction',direction);await expect(source).toHaveCSS('animation-name',`bottle-pour-${direction}`);await expect(page.locator('.pour-stream .stream-shadow')).toHaveAttribute('d',/^M/);
+ await expect(page.locator('.pouring')).toHaveCount(0);
+});
 test('rapid taps preserve four units of each color; pause blocks board',async({page})=>{
  await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();await page.getByRole('button',{name:/チュートリアル 2色/}).click();
  const [a,b]=stages[0].solution[0];

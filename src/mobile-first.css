@@ -78,13 +78,17 @@
   .mobile-nav button { font-size: 9px; }
 }
 
-/* A single grouped pour animates as one continuous stream. */
-.bottle-grid.pouring .bottle.selected {
-  transform: translateY(-5px) rotate(19deg);
-  transform-origin: 50% 10%;
-  transition: transform .76s cubic-bezier(.22,.7,.25,1);
+/* Tip toward the receiving bottle, hold while the stream pours, then settle. */
+.bottle-grid.pouring .bottle.pouring-source {
+  z-index: 5;
+  transform-origin: 50% 94%;
+  filter: drop-shadow(0 8px 5px #755a382c);
 }
-.bottle-grid.pouring .bottle.selected .liquid-layer {
+.bottle-grid.pouring .bottle:disabled { opacity: 1; }
+.bottle-grid.pouring .bottle.pouring-source[data-pour-direction="left"] { animation: bottle-pour-left .76s cubic-bezier(.22,.7,.25,1) both; }
+.bottle-grid.pouring .bottle.pouring-source[data-pour-direction="right"] { animation: bottle-pour-right .76s cubic-bezier(.22,.7,.25,1) both; }
+.bottle-grid.pouring .bottle.pouring-source .bottle-number { opacity: 0; }
+.bottle-grid.pouring .bottle.pouring-source .liquid-layer {
   transform-box: fill-box;
   transform-origin: center;
   animation: liquid-rock .42s ease-in-out 2 alternate;
@@ -95,6 +99,8 @@
 .pour-stream .stream-core { animation: core-travel .76s ease-in-out both; }
 .pour-stream .pour-drop { animation: drop-flight .76s ease-in-out both; }
 @keyframes liquid-rock { from { transform: translateY(-1px) rotate(-1deg); } to { transform: translateY(1px) rotate(1deg); } }
+@keyframes bottle-pour-right { 0% { transform: translateY(-8%) rotate(0); } 14% { transform: translateY(-16%) rotate(0); } 25%, 75% { transform: translateY(-28%) rotate(42deg); } 92% { transform: translateY(-12%) rotate(0); } 100% { transform: translateY(0) rotate(0); } }
+@keyframes bottle-pour-left { 0% { transform: translateY(-8%) rotate(0); } 14% { transform: translateY(-16%) rotate(0); } 25%, 75% { transform: translateY(-28%) rotate(-42deg); } 92% { transform: translateY(-12%) rotate(0); } 100% { transform: translateY(0) rotate(0); } }
 @keyframes bottle-catch { 0%, 55% { transform: translateY(0) scale(1); } 76% { transform: translateY(2px) scale(.96,1.025); } 100% { transform: translateY(0) scale(1); } }
 @keyframes streamFade { 0%, 100% { opacity: 0; } 18%, 78% { opacity: .92; } }
 @keyframes liquid-travel { 0% { stroke-dasharray: 0 900; opacity: 0; } 16% { opacity: .92; } 78% { stroke-dasharray: 900 0; opacity: .96; } 100% { opacity: 0; } }
