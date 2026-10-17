@@ -19,13 +19,6 @@ export const ITEMS = [
  {id:'flower',name:'花飾り',kind:'outfit',price:60,icon:'🌼'},
  {id:'hoodie',name:'パーカー',kind:'outfit',price:120,icon:'👕'},
  {id:'crown',name:'王冠',kind:'outfit',price:200,icon:'👑'},
- {id:'bowtie',name:'蝶ネクタイ',kind:'outfit',price:60,icon:'🎀'},
- {id:'glasses',name:'まるメガネ',kind:'outfit',price:70,icon:'👓'},
- {id:'scarf',name:'しましまマフラー',kind:'outfit',price:80,icon:'🧣'},
- {id:'beret',name:'ベレー帽',kind:'outfit',price:110,icon:'🎨'},
- {id:'cape',name:'ヒーローマント',kind:'outfit',price:0,icon:'🦸'},
- {id:'wizard',name:'魔法使いの帽子',kind:'outfit',price:0,icon:'🪄'},
- {id:'tiara',name:'星のティアラ',kind:'outfit',price:0,icon:'✨'},
  {id:'bed',name:'ふかふかベッド',kind:'furniture',price:90,icon:'🛏️'},
  {id:'sofa',name:'小さなソファ',kind:'furniture',price:150,icon:'🛋️'},
  {id:'cushion',name:'まあるいクッション',kind:'furniture',price:60,icon:'☁️'},
@@ -46,6 +39,3 @@ export const ITEMS = [
  {id:'floor-mint',name:'ミントタイルの床',kind:'floor',price:130,icon:'🟩'},
 ] as const;
 export const EXPRESSIONS=['通常','喜ぶ','笑う','驚く','困る','応援する','眠る','なでられる'] as const;
-
-/** Outfits that can't be bought: they are handed out by tier-clear missions. */
-export const REWARD_ONLY:readonly string[]=['cape','wizard','tiara'];
