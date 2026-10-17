@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react';
-import { COLORS, DOGS, ITEMS, SYMBOLS, type DogId } from './data/catalog';
+import { COLOR_NAMES, COLORS, DOGS, ITEMS, SYMBOLS, type DogId } from './data/catalog';
 import { useGame } from './game/store';
 
 export function Dog({id,className='',expression=0}:{id:DogId;className?:string;expression?:number}) {
@@ -26,7 +26,7 @@ export function BottleSvg({layers,symbols=false,tilt,liquid}:{layers:number[];sy
 export function Bottle({layers,index,selected=false,receiving=false,pouring=false,hint=false,invalid=false,disabled=false,onClick,symbols=false,decorative=false}:{layers:number[];index:number;selected?:boolean;receiving?:boolean;pouring?:boolean;hint?:boolean;invalid?:boolean;disabled?:boolean;onClick?:()=>void;symbols?:boolean;decorative?:boolean}) {
   const svg=<BottleSvg layers={layers} symbols={symbols}/>;
   if(decorative)return <span className="bottle decorative">{svg}</span>;
-  return <button className={`bottle ${selected?'selected':''} ${receiving?'receiving':''} ${pouring?'pouring-source':''} ${hint?'hinted':''} ${invalid?'invalid':''} ${layers.length===4&&layers.every(x=>x===layers[0])?'complete':''}`} disabled={disabled} onClick={onClick} aria-label={`瓶${index+1}：${layers.length?layers.map(c=>['赤','青','黄','緑','紫','ピンク','水色'][c]).join('、'):'空'}`} aria-pressed={selected} data-bottle={index}>{svg}<span className="bottle-number">{index+1}</span></button>;
+  return <button className={`bottle ${selected?'selected':''} ${receiving?'receiving':''} ${pouring?'pouring-source':''} ${hint?'hinted':''} ${invalid?'invalid':''} ${layers.length===4&&layers.every(x=>x===layers[0])?'complete':''}`} disabled={disabled} onClick={onClick} aria-label={`瓶${index+1}：${layers.length?layers.map(c=>COLOR_NAMES[c]).join('、'):'空'}`} aria-pressed={selected} data-bottle={index}>{svg}<span className="bottle-number">{index+1}</span></button>;
 }
 type Box={x:number;y:number;w:number;h:number};
 export type PourPlan={from:number;to:number;color:number;amount:number;source:number[];target:number[];sourceBox:Box;targetBox:Box;restY:number;symbols:boolean};

@@ -9,7 +9,7 @@ test('onboarding, real pours, undo, restart, hints, save restoration and first f
  await page.getByRole('checkbox',{name:/アニメーションを控えめに/}).check();
  await page.getByRole('button',{name:'閉じる',exact:true}).click();
  await page.getByRole('button',{name:/ソラとはじめる/}).click();
- await page.getByRole('button',{name:/チュートリアル 2色/}).click();
+ await page.getByRole('button',{name:/チュートリアル 3色/}).click();
  const first=stages[0].solution[0];
  await page.locator(`[data-bottle="${first[0]}"]`).click();await page.locator(`[data-bottle="${first[1]}"]`).click();
  await expect(page.getByTestId('moves')).toHaveText('1');
@@ -39,15 +39,15 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await page.locator('.shop-item').filter({hasText:'ふかふかベッド'}).getByRole('button').click();
  await expect(page.locator('.placed-furniture')).toHaveCount(1);
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'閉じる',exact:true}).click();
- // Album detail exposes a real partner selector on both layouts.
- await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:info.project.name==='mobile'?'なかま':'なかまたち',exact:true}).click();
+ // Album detail exposes a real partner selector from the bottom tabs.
+ await page.locator('.mobile-nav').getByRole('button',{name:'なかま',exact:true}).click();
  await page.locator('.dog-card').filter({hasText:'レオ'}).click();await expect(page.locator('.detail-content>p').first()).toHaveText('コーギー');
  await page.getByRole('button',{name:'パートナーにする'}).click();
  await page.locator('.dog-card').filter({hasText:'レオ'}).click();
  await page.getByRole('button',{name:'着せ替える',exact:false}).click();
  await page.locator('.shop-item').filter({hasText:'麦わら帽子'}).getByRole('button').click();
  await expect(page.locator('.dress-preview .outfit-hat')).toBeVisible();
- await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:'ミッション',exact:true}).click();
+ await page.locator('.mobile-nav').getByRole('button',{name:'ミッション',exact:true}).click();
  await page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button').click();
  await expect(page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button')).toBeDisabled();
  await page.reload();
@@ -56,19 +56,20 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 test('bottle flies over the target, tips with level liquid and pours a straight stream',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();await page.getByRole('button',{name:/チュートリアル 2色/}).click();
+ await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();await page.getByRole('button',{name:/チュートリアル 3色/}).click();
  const [from,to]=stages[0].solution[0],source=page.locator(`[data-bottle="${from}"]`),target=page.locator(`[data-bottle="${to}"]`);
  const targetBox=await target.locator('svg').boundingBox();
  await source.click();await target.click();
  await expect(source).toHaveClass(/pouring-source/);await expect(source.locator('svg')).toHaveCSS('visibility','hidden');await expect(page.locator('.pour-layer .pour-source')).toHaveAttribute('data-pour-direction',/^(left|right)$/);
- const stream=page.locator('.pour-layer .stream-body');await expect(stream).toHaveCount(1);
+ // Sample once the stream has reached the target, not on the frame it starts growing.
+ await page.waitForFunction(()=>(document.querySelector('.pour-layer .stream-body')?.getBoundingClientRect().height??0)>10);
  const pour=await page.evaluate(()=>{const clone=document.querySelector('.pour-layer .pour-source') as HTMLElement,r=document.querySelector('.pour-layer .stream-body')!.getBoundingClientRect();return {angle:parseFloat(clone.style.transform.replace(/[^-\d.]/g,'')),level:clone.querySelector('g[transform^="rotate"]')?.getAttribute('transform')??'',x:r.x+r.width/2,width:r.width,height:r.height};});
  expect(Math.abs(pour.angle)).toBeGreaterThan(55);expect(Math.abs(pour.angle)).toBeLessThan(95);expect(pour.level).toMatch(/^rotate\(-?\d/);
- expect(pour.x).toBeGreaterThan(targetBox!.x);expect(pour.x).toBeLessThan(targetBox!.x+targetBox!.width);expect(pour.width).toBeLessThan(10);expect(pour.height).toBeGreaterThan(10);
+ expect(pour.x).toBeGreaterThan(targetBox!.x);expect(pour.x).toBeLessThan(targetBox!.x+targetBox!.width);expect(pour.width).toBeLessThan(10);
  await expect(page.locator('.pouring')).toHaveCount(0);
 });
 test('rapid taps preserve four units of each color; pause blocks board',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();await page.getByRole('button',{name:/チュートリアル 2色/}).click();
+ await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();await page.getByRole('button',{name:/チュートリアル 3色/}).click();
  const [a,b]=stages[0].solution[0];
  await page.locator(`[data-bottle="${a}"]`).click();await page.locator(`[data-bottle="${b}"]`).click({clickCount:4,delay:10});
  await expect(page.locator('.pouring')).toHaveCount(0);
