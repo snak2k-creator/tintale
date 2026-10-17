@@ -9,9 +9,9 @@ export const DOGS = [
  {id:'moka',name:'モカ',breed:'ポメラニアン',stage:40,index:7,personality:'ふわふわ、人懐っこい天使。',story:'ソラのバンダナにそっと鼻を寄せたモカ。8匹みんなの暮らしが始まります。',action:'ミルと仲良くお昼寝',color:'#deb99c'},
 ] as const;
 export type DogId = typeof DOGS[number]['id'];
-export const COLORS=['#f27b7f','#5f8fe3','#f7cf55','#68bd6c','#a387e3','#f59ccb','#67d0f2','#f8a65e','#b98d68'];
-export const COLOR_NAMES=['赤','青','黄','緑','紫','ピンク','水色','オレンジ','茶'];
-export const SYMBOLS=['●','◆','★','▲','✚','♥','⬟','■','✿'];
+export const COLORS=['#f27b7f','#5f8fe3','#f7cf55','#68bd6c','#a387e3','#f59ccb','#67d0f2','#f8a65e','#b98d68','#9ea4b4'];
+export const COLOR_NAMES=['赤','青','黄','緑','紫','ピンク','水色','オレンジ','茶','グレー'];
+export const SYMBOLS=['●','◆','★','▲','✚','♥','⬟','■','✿','☾'];
 export const ITEMS = [
  {id:'ribbon',name:'赤いリボン',kind:'outfit',price:50,icon:'🎀'},
  {id:'collar',name:'青い首輪',kind:'outfit',price:50,icon:'🔹'},
@@ -19,6 +19,13 @@ export const ITEMS = [
  {id:'flower',name:'花飾り',kind:'outfit',price:60,icon:'🌼'},
  {id:'hoodie',name:'パーカー',kind:'outfit',price:120,icon:'👕'},
  {id:'crown',name:'王冠',kind:'outfit',price:200,icon:'👑'},
+ {id:'bowtie',name:'蝶ネクタイ',kind:'outfit',price:60,icon:'🎀'},
+ {id:'glasses',name:'まるメガネ',kind:'outfit',price:70,icon:'👓'},
+ {id:'scarf',name:'しましまマフラー',kind:'outfit',price:80,icon:'🧣'},
+ {id:'beret',name:'ベレー帽',kind:'outfit',price:110,icon:'🎨'},
+ {id:'cape',name:'ヒーローマント',kind:'outfit',price:0,icon:'🦸'},
+ {id:'wizard',name:'魔法使いの帽子',kind:'outfit',price:0,icon:'🪄'},
+ {id:'tiara',name:'星のティアラ',kind:'outfit',price:0,icon:'✨'},
  {id:'bed',name:'ふかふかベッド',kind:'furniture',price:90,icon:'🛏️'},
  {id:'sofa',name:'小さなソファ',kind:'furniture',price:150,icon:'🛋️'},
  {id:'cushion',name:'まあるいクッション',kind:'furniture',price:60,icon:'☁️'},
@@ -30,9 +37,15 @@ export const ITEMS = [
  {id:'wall-garden',name:'ガーデンの壁紙',kind:'wallpaper',price:120,icon:'🌿'},
  {id:'wall-girly',name:'花色の壁紙',kind:'wallpaper',price:120,icon:'🌷'},
  {id:'wall-cafe',name:'カフェの壁紙',kind:'wallpaper',price:120,icon:'☕'},
+ {id:'wall-night',name:'星空の壁紙',kind:'wallpaper',price:150,icon:'🌙'},
+ {id:'wall-sakura',name:'さくらの壁紙',kind:'wallpaper',price:150,icon:'🌸'},
  {id:'floor-oak',name:'オークの床',kind:'floor',price:100,icon:'🪵'},
  {id:'floor-herringbone',name:'ヘリンボーンの床',kind:'floor',price:120,icon:'🪵'},
  {id:'floor-checker',name:'市松もようの床',kind:'floor',price:120,icon:'▦'},
  {id:'floor-flower',name:'花模様の床',kind:'floor',price:140,icon:'🌼'},
+ {id:'floor-mint',name:'ミントタイルの床',kind:'floor',price:130,icon:'🟩'},
 ] as const;
 export const EXPRESSIONS=['通常','喜ぶ','笑う','驚く','困る','応援する','眠る','なでられる'] as const;
+
+/** Outfits that can't be bought: they are handed out by tier-clear missions. */
+export const REWARD_ONLY:readonly string[]=['cape','wizard','tiara'];

@@ -99,3 +99,44 @@
   .bottle-grid.bottles-9, .bottle-grid.bottles-10 { max-width: 540px; gap: 24px; }
   .bottle-grid.bottles-11, .bottle-grid.bottles-12 { max-width: 630px; gap: 24px; }
 }
+
+/* New wallpapers and floor. */
+.theme-wall-night .room-art { filter: hue-rotate(195deg) saturate(.7) brightness(.78); }
+.theme-wall-sakura .room-art { filter: hue-rotate(320deg) saturate(1.1) brightness(1.06); }
+.item-wall-night { filter: hue-rotate(195deg) saturate(.8) brightness(.75); }
+.item-wall-sakura { filter: hue-rotate(320deg) saturate(1.25) brightness(1.04); }
+.floor-floor-mint:after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 40%; pointer-events: none; z-index: 31; mix-blend-mode: multiply; background: linear-gradient(#bfe6d23d, #bfe6d23d), repeating-linear-gradient(90deg, #6f9e8830 0 1px, transparent 1px 30px), repeating-linear-gradient(0deg, #6f9e8830 0 1px, transparent 1px 30px); }
+.floor-floor-mint .item-art { background: none; }
+.item-floor-mint { border: 1px solid #9fc4b1; border-radius: 6px; background-color: #d6efe2; background-image: repeating-linear-gradient(90deg, #8fb9a4 0 1px, transparent 1px 12px), repeating-linear-gradient(0deg, #8fb9a4 0 1px, transparent 1px 12px) !important; background-size: auto !important; }
+
+/* Hand-drawn outfits: where each sits on a dog. */
+.item-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.dog-outfit.outfit-glasses { width: 44%; top: 27% !important; transform: translateX(-50%); }
+.dog-outfit.outfit-bowtie { width: 30%; top: 55% !important; transform: translateX(-50%); }
+.dog-outfit.outfit-scarf { width: 50%; top: 50% !important; transform: translateX(-50%); }
+.dog-outfit.outfit-cape { width: 62%; top: 52% !important; transform: translateX(-50%); z-index: 1; }
+.dog-outfit.outfit-beret { width: 40%; top: 4% !important; }
+.dog-outfit.outfit-wizard { width: 46%; top: -12% !important; }
+.dog-outfit.outfit-tiara { width: 32%; top: 6% !important; transform: translateX(-50%); }
+.dog-outfit.breed-leo.outfit-glasses, .dog-outfit.breed-luna.outfit-glasses { top: 31% !important; }
+.mission-item { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #7a5ea8; background: #efe8fb; border-radius: 99px; padding: 3px 8px; }
+
+/* Stage select: one difficulty at a time. */
+.tier-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; margin-bottom: 14px; scrollbar-width: none; }
+.tier-tabs::-webkit-scrollbar { display: none; }
+.tier-tabs button { flex: 0 0 auto; display: grid; gap: 2px; min-width: 92px; padding: 9px 14px; border: 1px solid #e1d5bd; border-radius: 14px; background: #fffcf4; color: #6f604b; text-align: left; }
+.tier-tabs button strong { font-size: 13px; font-weight: 600; }
+.tier-tabs button small { font-size: 11px; color: #94846b; }
+.tier-tabs button.active { background: #6c7e61; border-color: #6c7e61; color: #fff; }
+.tier-tabs button.active small { color: #e8eedf; }
+.tier-tabs button.complete:not(.active) small { color: #6c7e61; font-weight: 600; }
+.tier-note { display: flex; align-items: center; gap: 6px; margin: -4px 0 14px; font-size: 12px; color: #7a5ea8; }
+.mystery-note { background: #f3eefb; border-color: #ddd0f2; }
+
+/* Home: one chosen companion instead of the whole pack. */
+.home-dog-picker { display: flex; gap: 6px; overflow-x: auto; padding: 12px 16px 2px; scrollbar-width: none; }
+.home-dog-picker::-webkit-scrollbar { display: none; }
+.home-dog-picker button { flex: 0 0 auto; display: grid; justify-items: center; gap: 2px; width: 64px; padding: 6px 4px 7px; border: 1px solid transparent; border-radius: 14px; background: none; color: #85755d; font-size: 11px; }
+.home-dog-picker button .dog-wrap { width: 46px; }
+.home-dog-picker button .dog-sprite { animation: none; }
+.home-dog-picker button.active { background: #eef1e8; border-color: #c9d4bd; color: #55664b; font-weight: 600; }
