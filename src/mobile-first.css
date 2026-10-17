@@ -85,24 +85,28 @@
   filter: drop-shadow(0 8px 5px #755a382c);
 }
 .bottle-grid.pouring .bottle:disabled { opacity: 1; }
-.bottle-grid.pouring .bottle.pouring-source[data-pour-direction="left"] { animation: bottle-pour-left .76s cubic-bezier(.22,.7,.25,1) both; }
-.bottle-grid.pouring .bottle.pouring-source[data-pour-direction="right"] { animation: bottle-pour-right .76s cubic-bezier(.22,.7,.25,1) both; }
+.bottle-grid.pouring .bottle.pouring-source[data-pour-direction="left"] { animation: bottle-pour-left .92s cubic-bezier(.22,.7,.25,1) both; }
+.bottle-grid.pouring .bottle.pouring-source[data-pour-direction="right"] { animation: bottle-pour-right .92s cubic-bezier(.22,.7,.25,1) both; }
 .bottle-grid.pouring .bottle.pouring-source .bottle-number { opacity: 0; }
 .bottle-grid.pouring .bottle.pouring-source .liquid-layer {
   transform-box: fill-box;
   transform-origin: center;
   animation: liquid-rock .42s ease-in-out 2 alternate;
 }
-.bottle.receiving { animation: bottle-catch .76s cubic-bezier(.2,.75,.25,1) both; }
-.pour-stream { height: 100dvh; animation: streamFade .76s ease-in-out both; }
-.pour-stream .stream-shadow { animation: liquid-travel .76s cubic-bezier(.24,.7,.3,1) both; }
-.pour-stream .stream-core { animation: core-travel .76s ease-in-out both; }
-.pour-stream .pour-drop { animation: drop-flight .76s ease-in-out both; }
+.bottle-grid.pouring .bottle.pouring-source .liquid-layer.draining {
+  animation: liquid-rock .42s ease-in-out 2 alternate, liquid-drain .28s ease-in var(--drain-delay) both;
+}
+.bottle.receiving { animation: bottle-catch .92s cubic-bezier(.2,.75,.25,1) both; }
+.pour-stream { height: 100dvh; animation: streamFade .92s ease-in-out both; }
+.pour-stream .stream-shadow { animation: liquid-travel .92s cubic-bezier(.24,.7,.3,1) both; }
+.pour-stream .stream-core { animation: core-travel .92s ease-in-out both; }
+.pour-stream .pour-drop { animation: drop-flight .92s ease-in-out both; }
 @keyframes liquid-rock { from { transform: translateY(-1px) rotate(-1deg); } to { transform: translateY(1px) rotate(1deg); } }
-@keyframes bottle-pour-right { 0% { transform: translateY(-8%) rotate(0); } 14% { transform: translateY(-16%) rotate(0); } 25%, 75% { transform: translateY(-28%) rotate(42deg); } 92% { transform: translateY(-12%) rotate(0); } 100% { transform: translateY(0) rotate(0); } }
-@keyframes bottle-pour-left { 0% { transform: translateY(-8%) rotate(0); } 14% { transform: translateY(-16%) rotate(0); } 25%, 75% { transform: translateY(-28%) rotate(-42deg); } 92% { transform: translateY(-12%) rotate(0); } 100% { transform: translateY(0) rotate(0); } }
+@keyframes liquid-drain { from { opacity: 1; } to { opacity: 0; transform: translateY(-12px) scaleY(.35); } }
+@keyframes bottle-pour-right { 0% { transform: translate(0,-8%) rotate(0deg); } 12% { transform: translate(0,-16%) rotate(0deg); } 28%, 72%, 82% { transform: translate(var(--pour-x),var(--pour-y)) rotate(var(--pour-angle)); } 100% { transform: translate(0,0) rotate(0deg); } }
+@keyframes bottle-pour-left { 0% { transform: translate(0,-8%) rotate(0deg); } 12% { transform: translate(0,-16%) rotate(0deg); } 28%, 72%, 82% { transform: translate(var(--pour-x),var(--pour-y)) rotate(var(--pour-angle)); } 100% { transform: translate(0,0) rotate(0deg); } }
 @keyframes bottle-catch { 0%, 55% { transform: translateY(0) scale(1); } 76% { transform: translateY(2px) scale(.96,1.025); } 100% { transform: translateY(0) scale(1); } }
-@keyframes streamFade { 0%, 100% { opacity: 0; } 18%, 78% { opacity: .92; } }
-@keyframes liquid-travel { 0% { stroke-dasharray: 0 900; opacity: 0; } 16% { opacity: .92; } 78% { stroke-dasharray: 900 0; opacity: .96; } 100% { opacity: 0; } }
-@keyframes core-travel { 0%, 14% { stroke-dasharray: 0 900; opacity: 0; } 36% { opacity: .78; } 82% { stroke-dasharray: 900 0; opacity: .84; } 100% { opacity: 0; } }
+@keyframes streamFade { 0%, 100% { opacity: 0; } 22%, 76% { opacity: .92; } }
+@keyframes liquid-travel { 0% { stroke-dasharray: 0 900; opacity: 0; } 20% { opacity: .92; } 76% { stroke-dasharray: 900 0; opacity: .96; } 100% { opacity: 0; } }
+@keyframes core-travel { 0%, 18% { stroke-dasharray: 0 900; opacity: 0; } 36% { opacity: .78; } 80% { stroke-dasharray: 900 0; opacity: .84; } 100% { opacity: 0; } }
 @keyframes drop-flight { 0% { opacity: 0; transform: translateY(-4px) scale(.7); } 24% { opacity: 1; } 78% { opacity: 1; } 100% { opacity: 0; transform: translateY(18px) scale(.88); } }

@@ -60,7 +60,7 @@ test('bottle tips toward the target while the liquid stream pours',async({page})
  const [from,to]=stages[0].solution[0],source=page.locator(`[data-bottle="${from}"]`),target=page.locator(`[data-bottle="${to}"]`);
  const [sourceX,targetX]=await Promise.all([source.evaluate(el=>{const r=el.querySelector('svg')!.getBoundingClientRect();return r.x+r.width/2}),target.evaluate(el=>{const r=el.querySelector('svg')!.getBoundingClientRect();return r.x+r.width/2})]);
  const direction=targetX<sourceX?'left':'right';await source.click();await target.click();
- await expect(source).toHaveClass(/pouring-source/);await expect(source).toHaveAttribute('data-pour-direction',direction);await expect(source).toHaveCSS('animation-name',`bottle-pour-${direction}`);await expect(page.locator('.pour-stream .stream-shadow')).toHaveAttribute('d',/^M/);
+ await expect(source).toHaveClass(/pouring-source/);await expect(source.locator('.liquid-layer.draining')).not.toHaveCount(0);await expect(source).toHaveAttribute('data-pour-direction',direction);await expect(source).toHaveCSS('animation-name',`bottle-pour-${direction}`);const flight=await source.evaluate(el=>({x:parseFloat(getComputedStyle(el).getPropertyValue('--pour-x')),y:parseFloat(getComputedStyle(el).getPropertyValue('--pour-y')),angle:parseFloat(getComputedStyle(el).getPropertyValue('--pour-angle'))}));expect(Math.abs(flight.x)).toBeGreaterThan(0);expect(Math.abs(flight.y)).toBeGreaterThan(0);expect(flight.angle).toBe(direction==='left'?-100:100);await expect(page.locator('.pour-stream .stream-shadow')).toHaveAttribute('d',/^M/);
  await expect(page.locator('.pouring')).toHaveCount(0);
 });
 test('rapid taps preserve four units of each color; pause blocks board',async({page})=>{
