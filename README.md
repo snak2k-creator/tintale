@@ -71,4 +71,4 @@ Undo・ヒントは無制限。時間制限はありません。星3の目安以
 |`src/App.tsx`|画面・ダイアログ・操作制御|
 |`scripts/build-offline.mjs`|ビルドに一致するオフラインキャッシュ|
 
-推奨スタックを踏まえ、サーバー機能のないローカルゲームに適したVite / React / TypeScript strict / Zustandを採用しました。Firebase・外部API・有料サービスは使用していません。GitHubへのpush・mergeや公開は実施していません。
+推奨スタックを踏まえ、サーバー機能のないローカルゲームに適したVite / React / TypeScript strict / Zustandを採用しました。Firebase・外部API・有料サービスは使用していません。変更を依頼されたときは、関連するテストと本番ビルドを実行したうえで、コミットを非公開GitHubリポジトリの `main` に反映します。ブランチ保護で直接反映できない場合は、必要なチェックを通したPull Requestを作成・マージします。公開リポジトリへの変更は、明示的な依頼がない限り行いません。
