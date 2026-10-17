@@ -4,11 +4,21 @@ export const CAPACITY = 4;
 export const cloneBoard = (b: Board): Board => b.map(x => [...x]);
 export function legal(b: Board, from: number, to: number): boolean {
   const a = b[from], z = b[to];
-  return from !== to && !!a?.length && !!z && z.length < 4 && (!z.length || a.at(-1) === z.at(-1));
+  return from !== to && !!a?.length && !!z && z.length < CAPACITY && (!z.length || a.at(-1) === z.at(-1));
+}
+export function pourAmount(b: Board, from: number, to: number): number {
+  if (!legal(b, from, to)) return 0;
+  const source = b[from], color = source.at(-1)!;
+  let run = 0;
+  for (let i = source.length - 1; i >= 0 && source[i] === color; i--) run++;
+  return Math.min(run, CAPACITY - b[to].length);
 }
 export function pour(b: Board, from: number, to: number): Board | null {
   if (!legal(b, from, to)) return null;
-  const next = cloneBoard(b); next[to].push(next[from].pop()!); return next;
+  const next = cloneBoard(b), amount = pourAmount(b, from, to);
+  next[from].splice(next[from].length - amount, amount);
+  next[to].push(...Array(amount).fill(b[from].at(-1)!));
+  return next;
 }
 export const solved = (b: Board): boolean => b.some(x => x.length > 0) && b.every(x => !x.length || (x.length === 4 && x.every(c => c === x[0])));
 const canonical = (b: Board): string => b.map(x => x.join('')).sort().join('|');

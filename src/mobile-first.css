@@ -1,0 +1,102 @@
+/* A compact, thumb-first board and larger touch targets on phones. */
+@media (max-width: 720px) {
+  :root { font-size: 15px; }
+  body { min-width: 320px; }
+  main { padding: 18px 14px calc(104px + env(safe-area-inset-bottom)); }
+  .topbar { height: 62px; padding: 0 15px; }
+  .topbar-actions { gap: 9px; }
+  .home-grid { grid-template-columns: minmax(0, 1fr); }
+  .home-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page-intro h1 { font-size: 24px; line-height: 1.35; }
+  .page-intro > div > p:last-child:not(.eyebrow) { font-size: 12px; line-height: 1.7; }
+  .mobile-nav { padding: 7px 3px calc(7px + env(safe-area-inset-bottom)); }
+  .mobile-nav button { min-height: 48px; gap: 4px; font-size: 10px; }
+  .mobile-nav button svg { width: 20px; height: 20px; }
+
+  .puzzle-layout { display: flex; flex-direction: column; gap: 12px; }
+  .puzzle-page .page-intro { margin-bottom: 14px; }
+  .puzzle-page .page-intro h1 { font-size: 25px; }
+  .puzzle-board { border-radius: 17px; }
+  .board-toolbar { padding: 13px 12px; font-size: 11px; }
+  .board-toolbar > span:first-child { font-size: 11px; }
+  .board-toolbar .muted { font-size: 10px; }
+  .tutorial-note { margin: 12px 11px 0; padding: 10px; }
+  .tutorial-note p, .tutorial-note b { font-size: 12px; line-height: 1.65; }
+  .bottle-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: end;
+    justify-items: center;
+    gap: 10px 3px;
+    width: 100%;
+    max-width: 410px;
+    min-height: 0;
+    padding: 24px 8px 15px;
+  }
+  .bottles-4, .bottles-5, .bottles-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 340px; }
+  .bottles-7, .bottles-8, .bottles-9 { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 410px; gap: 8px 2px; }
+  .bottle, .bottles-7 .bottle, .bottles-8 .bottle, .bottles-9 .bottle {
+    width: min(100%, 64px);
+    transform: none;
+    touch-action: manipulation;
+  }
+  .bottle.selected { transform: translateY(-7px); }
+  .bottle-number { margin-top: 3px; font-size: 11px; }
+  .board-help { margin: 7px 0 13px; font-size: 11px; }
+  .puzzle-controls { gap: 8px; padding: 11px; }
+  .puzzle-controls button { min-height: 58px; gap: 5px; padding: 8px 5px; font-size: 12px; }
+  .puzzle-controls svg { width: 19px; height: 19px; }
+  .puzzle-companion {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    align-items: center;
+    gap: 2px 10px;
+    padding: 10px 13px;
+    text-align: left;
+  }
+  .puzzle-companion > .dog-wrap { grid-column: 1; grid-row: 1 / span 3; width: 52px; }
+  .puzzle-companion .speech-bubble { grid-column: 2; grid-row: 1; justify-self: start; max-width: 100%; padding: 7px 10px; font-size: 11px; }
+  .puzzle-companion h3 { grid-column: 2; margin: 1px 0; font-size: 13px; }
+  .puzzle-companion p { grid-column: 2; margin: 0; font-size: 11px; line-height: 1.5; }
+  .puzzle-companion .text-button { display: inline-flex; grid-column: 2; justify-self: start; margin-top: 3px; font-size: 11px; }
+  .stage-section { padding: 17px 13px; }
+  .stage-section .section-heading .muted { font-size: 10px; }
+  .daily-card h2 { font-size: 17px; }
+  .daily-card p, .friend-progress { font-size: 10px; }
+  .mission-info h3 { font-size: 13px; }
+  .mission-info p { font-size: 10px; }
+  .toast { font-size: 12px; }
+}
+
+@media (max-width: 380px) {
+  main { padding-right: 11px; padding-left: 11px; }
+  .topbar { padding: 0 12px; }
+  .bottle, .bottles-7 .bottle, .bottles-8 .bottle, .bottles-9 .bottle { width: min(100%, 58px); }
+  .bottle-grid { gap: 8px 1px; padding-right: 5px; padding-left: 5px; }
+  .puzzle-controls { gap: 6px; }
+  .puzzle-controls button { font-size: 11px; }
+  .mobile-nav button { font-size: 9px; }
+}
+
+/* A single grouped pour animates as one continuous stream. */
+.bottle-grid.pouring .bottle.selected {
+  transform: translateY(-5px) rotate(19deg);
+  transform-origin: 50% 10%;
+  transition: transform .76s cubic-bezier(.22,.7,.25,1);
+}
+.bottle-grid.pouring .bottle.selected .liquid-layer {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: liquid-rock .42s ease-in-out 2 alternate;
+}
+.bottle.receiving { animation: bottle-catch .76s cubic-bezier(.2,.75,.25,1) both; }
+.pour-stream { height: 100dvh; animation: streamFade .76s ease-in-out both; }
+.pour-stream .stream-shadow { animation: liquid-travel .76s cubic-bezier(.24,.7,.3,1) both; }
+.pour-stream .stream-core { animation: core-travel .76s ease-in-out both; }
+.pour-stream .pour-drop { animation: drop-flight .76s ease-in-out both; }
+@keyframes liquid-rock { from { transform: translateY(-1px) rotate(-1deg); } to { transform: translateY(1px) rotate(1deg); } }
+@keyframes bottle-catch { 0%, 55% { transform: translateY(0) scale(1); } 76% { transform: translateY(2px) scale(.96,1.025); } 100% { transform: translateY(0) scale(1); } }
+@keyframes streamFade { 0%, 100% { opacity: 0; } 18%, 78% { opacity: .92; } }
+@keyframes liquid-travel { 0% { stroke-dasharray: 0 900; opacity: 0; } 16% { opacity: .92; } 78% { stroke-dasharray: 900 0; opacity: .96; } 100% { opacity: 0; } }
+@keyframes core-travel { 0%, 14% { stroke-dasharray: 0 900; opacity: 0; } 36% { opacity: .78; } 82% { stroke-dasharray: 900 0; opacity: .84; } 100% { opacity: 0; } }
+@keyframes drop-flight { 0% { opacity: 0; transform: translateY(-4px) scale(.7); } 24% { opacity: 1; } 78% { opacity: 1; } 100% { opacity: 0; transform: translateY(18px) scale(.88); } }

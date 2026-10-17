@@ -1,15 +1,17 @@
 import { describe,it,expect } from 'vitest';
 import stages from '../data/stages.json';
 import { DOGS, ITEMS } from '../data/catalog';
-import { cloneBoard,legal,pour,solved,solve, type Board } from './puzzle';
+import { cloneBoard,legal,pour,pourAmount,solved,solve, type Board } from './puzzle';
 import { buy,claim,dailyStage,equip,finish,jstDate,moveSession,newSave,readSave,restartSession,rewardTotal,savedRoute,startSession,undoSession,unlocked, type Save } from './progression';
 const clearSave=(id=1,moves=999,daily:string|null=null):Save=>({...newSave(),session:{stage:id,daily,board:[[0,0,0,0],[1,1,1,1],[],[]],history:[],moves}});
-describe('one layer bottle rules',()=>{
+describe('grouped bottle pours',()=>{
  it('rejects empty source',()=>expect(legal([[],[]],0,1)).toBe(false));
  it('rejects overflow',()=>expect(pour([[0],[0,0,0,0]],0,1)).toBeNull());
  it('rejects other colors',()=>expect(pour([[0],[1]],0,1)).toBeNull());
  it('rejects self pour and invalid indices',()=>{expect(legal([[0]],0,0)).toBe(false);expect(legal([[0]],0,10)).toBe(false);});
- it('moves exactly one layer to same color',()=>expect(pour([[0,0],[0]],0,1)).toEqual([[0],[0,0]]));
+ it('moves the connected top-color run in one action',()=>{const board=[[1,2,2],[2],[]];expect(pourAmount(board,0,1)).toBe(2);expect(pour(board,0,1)).toEqual([[1],[2,2,2],[]]);});
+ it('stops a group at the destination capacity',()=>{const board=[[0,1,1],[1,1,1]];expect(pourAmount(board,0,1)).toBe(1);expect(pour(board,0,1)).toEqual([[0,1],[1,1,1,1]]);});
+ it('moves only the top contiguous color run',()=>expect(pour([[0,1,1],[]],0,1)).toEqual([[0],[1,1]]));
  it('allows empty destination without mutating source',()=>{const b=[[1,0],[]];expect(pour(b,0,1)).toEqual([[1],[0]]);expect(b).toEqual([[1,0],[]]);});
  it('requires all colors to be complete',()=>{expect(solved([[0,0],[0,0],[]])).toBe(false);expect(solved([[],[]])).toBe(false);expect(solved([[0,0,0,0],[1,1,1,1],[]])).toBe(true);expect(solved([[0,0,1,0]])).toBe(false);});
  it('undo restores board and count',()=>{let s=startSession(newSave(),1);const initial=s.session!.board;const [a,b]=stages[0].solution[0];s=moveSession(s,a,b);expect(s.session!.moves).toBe(1);s=undoSession(s);expect(s.session!.board).toEqual(initial);expect(s.session!.moves).toBe(0);});
@@ -18,7 +20,7 @@ describe('one layer bottle rules',()=>{
  it('hint solver handles dead ends safely',()=>expect(solve([[0,1,0,1],[1,0,1,0]])).toBeNull());
 });
 describe('45 verified fixed stages',()=>{
- it('contains expected tier distribution and no duplicate boards',()=>{expect(stages).toHaveLength(45);expect(['チュートリアル','かんたん','ふつう','むずかしい','エキスパート'].map(t=>stages.filter(s=>s.tier===t).length)).toEqual([5,10,10,10,10]);expect(new Set(stages.map(s=>s.board.map(x=>x.join('')).sort().join('|'))).size).toBe(45);});
+ it('raises colors and bottle counts as tiers advance',()=>{expect(stages).toHaveLength(45);expect(['チュートリアル','かんたん','ふつう','むずかしい','エキスパート'].map(t=>stages.filter(s=>s.tier===t).length)).toEqual([5,10,10,10,10]);expect([stages[0].colors,stages[5].colors,stages[15].colors,stages[25].colors,stages[35].colors]).toEqual([2,3,5,6,7]);expect([stages[0].board.length,stages[5].board.length,stages[15].board.length,stages[25].board.length,stages[35].board.length]).toEqual([4,5,7,7,8]);expect(new Set(stages.map(s=>s.board.map(x=>x.join('')).sort().join('|'))).size).toBe(45);});
  for(const stage of stages)it(`stage ${stage.id} conserves colors and has a fully legal saved answer`,()=>{expect(stage.board.length).toBe(stage.colors+stage.empties);for(let c=0;c<stage.colors;c++)expect(stage.board.flat().filter(x=>x===c)).toHaveLength(4);let b:Board=cloneBoard(stage.board);for(const [a,z] of stage.solution){expect(legal(b,a,z)).toBe(true);b=pour(b,a,z)!;}expect(solved(b)).toBe(true);});
  it('solver solves every board independently',()=>{for(const stage of stages){const route=solve(stage.board);expect(route).not.toBeNull();let b=stage.board;for(const [a,z] of route!)b=pour(b,a,z)!;expect(solved(b)).toBe(true);}});
  it('cached hints follow current board',()=>{let s=startSession(newSave(),1);expect(savedRoute(s.session!)![0]).toEqual(stages[0].solution[0]);const [a,b]=stages[0].solution[0];s=moveSession(s,a,b);expect(savedRoute(s.session!)![0]).toEqual(stages[0].solution[1]);});

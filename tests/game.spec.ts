@@ -9,6 +9,7 @@ test('onboarding, real pours, undo, restart, hints, save restoration and first f
  await page.getByRole('checkbox',{name:/アニメーションを控えめに/}).check();
  await page.getByRole('button',{name:'閉じる',exact:true}).click();
  await page.getByRole('button',{name:/ソラとはじめる/}).click();
+ await page.getByRole('button',{name:/チュートリアル 2色/}).click();
  const first=stages[0].solution[0];
  await page.locator(`[data-bottle="${first[0]}"]`).click();await page.locator(`[data-bottle="${first[1]}"]`).click();
  await expect(page.getByTestId('moves')).toHaveText('1');
@@ -55,7 +56,7 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 test('rapid taps preserve four units of each color; pause blocks board',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();
+ await page.goto('/');await page.getByRole('button',{name:/ソラとはじめる/}).click();await page.getByRole('button',{name:/チュートリアル 2色/}).click();
  const [a,b]=stages[0].solution[0];
  await page.locator(`[data-bottle="${a}"]`).click();await page.locator(`[data-bottle="${b}"]`).click({clickCount:4,delay:10});
  await expect(page.locator('.pouring')).toHaveCount(0);
