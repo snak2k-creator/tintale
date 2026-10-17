@@ -24,15 +24,17 @@ test('onboarding, real pours, undo, restart, hints, save restoration and first f
   await page.getByRole('button',{name:id===3?'新しいなかまに会う':'つぎのステージ',exact:true}).click();
  }
  await expect(page.getByRole('heading',{name:'新しいなかまが、やってきた！'})).toBeVisible();
- await page.getByRole('button',{name:/アトリエに迎える/}).click();await expect(page.locator('.room-dog')).toHaveCount(2);
- await page.reload();await expect(page.locator('.room-dog')).toHaveCount(2);
+ await page.getByRole('button',{name:/アトリエに迎える/}).click();await expect(page.locator('.home-dog-picker button')).toHaveCount(2);
+ await page.reload();await expect(page.locator('.home-dog-picker button')).toHaveCount(2);
+ // Home shows the one chosen companion; picking another switches the partner.
+ await expect(page.locator('.room-dog')).toHaveCount(1);await page.locator('.home-dog-picker button').filter({hasText:'チャイ'}).click();await expect(page.locator('.room-dog').getByRole('img')).toHaveAttribute('aria-label',/チャイ/);
  const data=await page.evaluate(()=>JSON.parse(localStorage.getItem('tintale.save.v2')!));expect(data.coins).toBe(180);expect(data.stars).toEqual({'1':3,'2':3,'3':3});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`test-results/first-friend-${info.project.name}.png`,fullPage:true});
 });
 test('8 dogs, partner, furniture, outfit, missions and persisted customization',async({page},info)=>{
  await page.goto('/');await page.evaluate(()=>{const save={version:2,started:true,coins:1000,stars:Object.fromEntries(Array.from({length:40},(_,i)=>[String(i+1),3])),partner:'sora',bond:{sora:60},owned:[],outfits:{},slots:[null,null,null],wall:'natural',floor:'natural',claimed:[],daily:[],clears:40,pets:0,session:null,settings:{sound:false,music:false,reduced:true,symbols:true}};localStorage.setItem('tintale.save.v2',JSON.stringify(save));});await page.reload();
- await expect(page.locator('.room-dog')).toHaveCount(8);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await expect(page.locator('.home-dog-picker button')).toHaveCount(8);await expect(page.locator('.room-dog')).toHaveCount(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.getByRole('button',{name:'ソラをなでる'}).click();
  await page.screenshot({path:`test-results/eight-dogs-${info.project.name}.png`,fullPage:true});
  // The room has a single entry point: the navigation.
@@ -53,7 +55,7 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await expect(page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button')).toBeDisabled();
  await page.reload();
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('tintale.save.v2')!));expect(saved.partner).toBe('leo');expect(saved.coins).toBe(860);expect(saved.claimed).toContain('three');expect(saved.slots[0]).toBe('bed');expect(saved.outfits.leo).toBe('hat');expect(saved.bond.sora).toBeGreaterThan(60);
- await expect(page.locator('.room-dog')).toHaveCount(8);
+ await expect(page.locator('.home-dog-picker button')).toHaveCount(8);await expect(page.locator('.room-dog')).toHaveCount(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 test('bottle flies over the target, tips with level liquid and pours a straight stream',async({page})=>{
