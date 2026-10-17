@@ -30,5 +30,8 @@ export const ITEMS = [
  {id:'wall-girly',name:'花色の壁紙',kind:'wallpaper',price:120,icon:'🌷'},
  {id:'wall-cafe',name:'カフェの壁紙',kind:'wallpaper',price:120,icon:'☕'},
  {id:'floor-oak',name:'オークの床',kind:'floor',price:100,icon:'🪵'},
+ {id:'floor-herringbone',name:'ヘリンボーンの床',kind:'floor',price:120,icon:'🪵'},
+ {id:'floor-checker',name:'市松もようの床',kind:'floor',price:120,icon:'▦'},
+ {id:'floor-flower',name:'花模様の床',kind:'floor',price:140,icon:'🌼'},
 ] as const;
 export const EXPRESSIONS=['通常','喜ぶ','笑う','驚く','困る','応援する','眠る','なでられる'] as const;

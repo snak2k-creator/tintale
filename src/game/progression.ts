@@ -10,7 +10,8 @@ export const unlocked = (s:Save) => DOGS.filter(d=>d.stage===0 || !!s.stars[d.st
 export const rewardTotal = (stars:number):number => stars>=3?60:stars===2?40:stars===1?30:0;
 export function startSession(s:Save,stage:number,daily:string|null=null):Save {
   const data=stages[stage-1];if(!data)return s;
-  if(!daily && stage>1 && !s.stars[stage-1])return s;
+  // First-time players may choose a starting tier; later stages still follow normal unlocks.
+  if(!daily && stage>1 && !s.stars[stage-1] && s.started)return s;
   return {...s,started:true,session:{stage,daily,board:cloneBoard(data.board),history:[],moves:0}};
 }
 export function moveSession(s:Save,from:number,to:number):Save {
