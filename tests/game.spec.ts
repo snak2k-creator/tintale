@@ -48,6 +48,7 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await expect(page.locator('.placed-furniture')).toHaveCount(1);
  // At most three dogs are out in the atelier.
  await expect(page.locator('.customize-preview .room-dog')).toHaveCount(3);
+ await expect(page.locator('.shop-item').filter({hasText:'カーペット'})).toHaveCount(0);await expect(page.locator('.shop-item').filter({hasText:'わんこのテント'})).toHaveCount(1);
  // Each wallpaper has its own swatch.
  await page.locator('.shop-tabs button').filter({hasText:'壁紙'}).click();
  const swatches=await page.locator('.shop-item .wall-swatch').evaluateAll(els=>els.map(e=>getComputedStyle(e).backgroundImage));
@@ -102,6 +103,8 @@ test('any difficulty can be chosen at any time, and dress-up sits under the play
  await page.getByRole('button',{name:/難易度をえらぶ/}).first().click();
  await page.getByRole('button',{name:/^エキスパート/}).click();
  await expect(page.getByRole('heading',{name:'ステージ 36'})).toBeVisible();
+ // While playing, the title and coin bar are out of the way.
+ await expect(page.locator('.topbar')).toBeHidden();
  // The partner is fully on screen while playing.
  const dog=await page.locator('.puzzle-companion .dog-wrap').boundingBox(),vp=page.viewportSize()!;
  expect(dog!.y).toBeGreaterThanOrEqual(0);expect(dog!.y+dog!.height).toBeLessThanOrEqual(vp.height-(info.project.name==='mobile'?70:0));

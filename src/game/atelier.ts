@@ -2,13 +2,12 @@ import { DOGS, type DogId } from '../data/catalog';
 import { unlocked, type Save } from './progression';
 /**
  * How a dog uses a placed piece of furniture: `seat` puts it on top (share of the item's height), `side` beside it.
- * `scale` sizes the piece against the dog's own width, so a bed fits one dog and a sofa is a little longer.
+ * `scale` sizes the piece against the dog's own width, so a bed fits one dog and the tent a little more.
  */
 export const FURNITURE_USE:Record<string,{seat?:number;side?:number;scale:number;expression:number;text:string}>={
  bed:{seat:.3,scale:1.3,expression:6,text:'ふかふかベッドで、すやすや。'},
- sofa:{seat:.36,scale:1.55,expression:1,text:'ソファでくつろぎ中。'},
+ tent:{seat:.14,scale:1.4,expression:1,text:'テントの中で、ひみつ基地ごっこ。'},
  cushion:{seat:.45,scale:1.1,expression:6,text:'クッションにまるくなってお昼寝。'},
- rug:{seat:.22,scale:2.2,expression:2,text:'カーペットでごろごろ。'},
  table:{side:1,scale:1.1,expression:1,text:'テーブルのそばで、おやつ待ち。'},
  plant:{side:-1,scale:.9,expression:3,text:'グリーンのにおいをくんくん。'},
  plush:{side:1,scale:.75,expression:2,text:'くまのぬいぐるみと遊んでいる。'},

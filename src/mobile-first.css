@@ -230,26 +230,56 @@
 html[data-motion="reduced"] .room-dog { transition: none; }
 html[data-motion="reduced"] .room-dog.walking .dog-sprite { animation: none; }
 
-/* Floors follow the room's perspective and fade into the wall line instead of sitting on top as a flat band. */
-.atelier-scene[class*="floor-floor-"]::after { top: 61%; bottom: -12%; left: -35%; right: -35%; height: auto; transform-origin: 50% 0; transform: perspective(26cqw) rotateX(58deg); -webkit-mask-image: linear-gradient(transparent, #000 14%); mask-image: linear-gradient(transparent, #000 14%); }
-.atelier-scene.floor-floor-oak::after { background: repeating-linear-gradient(90deg, #8a6235 0 2px, #c4955e 2px 46px, #b5874f 46px 48px, #d0a46a 48px 92px); mix-blend-mode: multiply; opacity: .55; }
-.atelier-scene.floor-floor-herringbone::after { opacity: .9; }
-.atelier-scene.floor-floor-checker::after { background: conic-gradient(#6f4f33 25%, #f3e5c4 0 50%, #6f4f33 0 75%, #f3e5c4 0); background-size: 48px 48px; mix-blend-mode: multiply; opacity: .45; }
-.atelier-scene.floor-floor-flower::after { background-color: #f6e4c1; background-size: 40px 40px, 20px 20px; opacity: .85; }
-.atelier-scene.floor-floor-mint::after { background: linear-gradient(#a8dcc2, #a8dcc2), repeating-linear-gradient(90deg, #5f927a 0 2px, transparent 2px 44px), repeating-linear-gradient(0deg, #5f927a 0 2px, transparent 2px 44px); background-blend-mode: multiply; mix-blend-mode: multiply; opacity: .55; }
+/* Floors replace the boards completely (opaque, in the room's perspective); the rug floors lay a rug on the original wood. */
+.atelier-scene[class*="floor-floor-"]::after { content: ''; position: absolute; pointer-events: none; z-index: 31; top: 61%; bottom: -12%; left: -35%; right: -35%; height: auto; transform-origin: 50% 0; transform: perspective(26cqw) rotateX(58deg); mix-blend-mode: normal; opacity: 1; -webkit-mask-image: linear-gradient(transparent, #000 5%); mask-image: linear-gradient(transparent, #000 5%); }
+/* Shared light: sun from the window, darker toward the front. */
+.atelier-scene.floor-floor-oak::after { background: radial-gradient(ellipse 45% 60% at 58% 8%, #fff4cf66, transparent 70%), linear-gradient(#0000 40%, #4a2a1030), repeating-linear-gradient(0deg, transparent 0 58px, #8c5e3255 58px 59px), repeating-linear-gradient(90deg, #9b6b3e 0 1px, #e3bb84 1px 15px, #dcb27a 15px 29px, #9b6b3e 29px 30px, #e8c48f 30px 45px, #d9ad74 45px 59px); }
+.atelier-scene.floor-floor-herringbone::after { background-color: #b98450; background-image: radial-gradient(ellipse 45% 60% at 58% 8%, #fff4cf66, transparent 70%), linear-gradient(#0000 40%, #3d200a33), repeating-linear-gradient(135deg, transparent 0 9px, #6e4523 9px 10px, transparent 10px 20px), repeating-linear-gradient(45deg, #d6a46b 0 9px, #6e4523 9px 10px, #c69258 10px 20px); background-size: auto; }
+.atelier-scene.floor-floor-checker::after { background: radial-gradient(ellipse 45% 60% at 58% 8%, #fff4cf55, transparent 70%), linear-gradient(#0000 40%, #3d200a2a), conic-gradient(#b98a62 25%, #f6ead0 0 50%, #b98a62 0 75%, #f6ead0 0); background-size: auto, auto, 34px 34px; }
+.atelier-scene.floor-floor-mint::after { background: radial-gradient(ellipse 45% 60% at 58% 8%, #ffffff66, transparent 70%), linear-gradient(#0000 40%, #1f3d3022), repeating-linear-gradient(90deg, #8fbfa8 0 1px, transparent 1px 26px), repeating-linear-gradient(0deg, #8fbfa8 0 1px, transparent 1px 26px), #cdeadb; background-blend-mode: normal; }
+/* Rugs on the wood: a single rug in the middle of the floor. */
+.atelier-scene.floor-floor-flower::after, .atelier-scene.floor-floor-plaid::after { top: 70%; bottom: 14%; left: 24%; right: 24%; transform: perspective(26cqw) rotateX(50deg); border-radius: 46% / 40%; -webkit-mask-image: none; mask-image: none; box-shadow: 0 0 0 6px #fff7e8, 0 0 0 8px #d9b58e, 0 6px 12px #5b3a1a40; }
+.atelier-scene.floor-floor-flower::after { background: radial-gradient(circle at 8px 8px, #e98fa6 0 3px, #fff3c4 3.5px 4.5px, transparent 5px), radial-gradient(circle at 20px 19px, #f6b9c8 0 2.5px, transparent 3px), radial-gradient(ellipse 2px 4px at 15px 12px, #8fb878 0 98%, transparent), #fbe3e6; background-size: 26px 26px; }
+.atelier-scene.floor-floor-plaid::after { border-radius: 10px; background: repeating-linear-gradient(90deg, #c76a5a55 0 6px, transparent 6px 20px), repeating-linear-gradient(0deg, #c76a5a55 0 6px, transparent 6px 20px), repeating-linear-gradient(90deg, transparent 0 12px, #fff8 12px 13px, transparent 13px 20px), #f2dcc0; }
+.item-floor-plaid { border: 1px solid #c8b28b; border-radius: 6px; background-color: #f2dcc0; background-image: repeating-linear-gradient(90deg, #c76a5a66 0 5px, transparent 5px 16px), repeating-linear-gradient(0deg, #c76a5a66 0 5px, transparent 5px 16px) !important; background-size: auto !important; }
+.item-tent { background-image: url('/assets/tent.webp') !important; background-size: contain !important; background-position: center bottom !important; }
 
-/* The partner is bigger while playing. */
-@media (min-width: 1001px) {
-  .puzzle-layout { grid-template-columns: minmax(0, 1fr) 270px; }
-  .puzzle-companion > .dog-wrap { width: 250px; }
+/* Playing: the board gets the whole screen, without the title and coin bar. */
+.workspace.playing .topbar { display: none; }
+.pause-settings { display: inline-flex; align-items: center; gap: 6px; margin: 12px auto 0; }
+
+/* The partner beside the board: bubble, dog and help line up on one axis. */
+.puzzle-page .puzzle-companion { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "bubble" "dog" "name" "text" "help"; justify-items: center; align-items: center; gap: 6px; text-align: center; padding: 60px 0 0; }
+.puzzle-page .puzzle-companion .speech-bubble { grid-area: bubble; width: max-content; max-width: 100%; margin: 0; }
+.puzzle-page .puzzle-companion .companion-dog { grid-area: dog; width: 250px; transform-origin: 50% 90%; }
+.puzzle-page .puzzle-companion .companion-dog .dog-wrap { display: block; width: 100%; margin: 0; }
+.puzzle-page .puzzle-companion h3 { grid-area: name; margin: 4px 0 0; }
+.puzzle-page .puzzle-companion p { grid-area: text; margin: 0; }
+.puzzle-page .puzzle-companion .text-button { grid-area: help; margin: 6px 0 0; }
+@media (min-width: 1001px) and (max-width: 1200px) { .puzzle-page .puzzle-companion .companion-dog { width: 200px; } }
+@media (max-width: 1000px) {
+  .puzzle-page .puzzle-companion { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "dog bubble" "dog help"; justify-items: start; text-align: left; column-gap: 14px; row-gap: 6px; padding: 4px 6px; }
+  .puzzle-page .puzzle-companion .companion-dog { width: 120px; align-self: center; margin: -34px 0 -6px; }
+  .puzzle-page .puzzle-companion h3, .puzzle-page .puzzle-companion p { display: none; }
+  .puzzle-page .puzzle-companion .speech-bubble { align-self: end; font-size: 12px; padding: 9px 13px; }
+  .puzzle-page .puzzle-companion .speech-bubble::after { left: -7px; top: calc(50% - 7px); bottom: auto; transform: rotate(135deg); }
+  .puzzle-page .puzzle-companion .text-button { display: inline-flex; align-self: start; margin: 0 0 0 6px; font-size: 12px; }
 }
-@media (min-width: 1001px) and (max-width: 1200px) {
-  .puzzle-layout { grid-template-columns: minmax(0, 1fr) 220px; }
-  .puzzle-companion > .dog-wrap { width: 210px; }
-}
-@media (max-width: 1000px) { .puzzle-companion > .dog-wrap { width: 130px; } .puzzle-companion .speech-bubble { font-size: 12px; } }
-@media (max-width: 720px) {
-  .puzzle-companion { grid-template-columns: 104px minmax(0, 1fr); }
-  .puzzle-companion > .dog-wrap { width: 104px; }
-  .puzzle-companion .speech-bubble { font-size: 12px; }
-}
+@media (max-width: 720px) { .puzzle-page .puzzle-companion .companion-dog { width: 100px; margin: -30px 0 -6px; } }
+
+/* Smooth, slow motion on the whole dog instead of the quick sprite jiggles. */
+.puzzle-companion .dog-sprite { animation: none !important; }
+.puzzle-companion .companion-dog { animation: comp-idle 6s ease-in-out infinite; }
+@keyframes comp-idle { 0%, 100% { transform: translate(0, 0) rotate(0); } 20% { transform: translate(-1.5%, -1.5%) rotate(-2.5deg); } 40% { transform: translate(0, -3%) rotate(0); } 60% { transform: translate(1.5%, -1.5%) rotate(2.5deg); } 80% { transform: translate(0, 0) scale(1.01, .99); } }
+.puzzle-companion.mood-select .companion-dog { animation: comp-look 2.4s ease-in-out infinite; }
+@keyframes comp-look { 0%, 100% { transform: rotate(-4deg) translateY(-2%); } 50% { transform: rotate(-7deg) translateY(-4%); } }
+.puzzle-companion.mood-pour .companion-dog { animation: comp-hop .6s cubic-bezier(.33, 0, .67, 1) infinite alternate; }
+@keyframes comp-hop { 0% { transform: translateY(0) scale(1.03, .97); } 100% { transform: translateY(-8%) scale(.98, 1.03); } }
+.puzzle-companion.mood-hint .companion-dog { animation: comp-nod 1.8s ease-in-out infinite; }
+@keyframes comp-nod { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg) translateY(-2%); } 60% { transform: rotate(-3deg); } }
+html[data-motion="reduced"] .puzzle-companion .companion-dog { animation: none; }
+@media (min-width: 1201px) { .puzzle-layout { grid-template-columns: minmax(0, 1fr) 270px; } }
+@media (min-width: 1001px) and (max-width: 1200px) { .puzzle-layout { grid-template-columns: minmax(0, 1fr) 220px; } }
+/* The room's own sunlight and shadows, laid over a new floor so it sits in the same light. */
+.floor-light { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 32; mix-blend-mode: soft-light; opacity: .8; clip-path: inset(61% 0 0 0); }
+@media (max-width: 720px) { .floor-light { object-position: 56% center; } }

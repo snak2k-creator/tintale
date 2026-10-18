@@ -1,5 +1,5 @@
 import stages from '../data/stages.json';
-import { DOGS, ITEMS, REWARD_ONLY, type DogId } from '../data/catalog';
+import { DOGS, ITEMS, REFUNDED_ITEMS, RENAMED_ITEMS, REWARD_ONLY, type DogId } from '../data/catalog';
 import { cloneBoard, pour, solved, type Board, type Move } from './puzzle';
 export type Session = {stage:number;daily:string|null;board:Board;history:Board[];moves:number};
 export type Save = {version:2;started:boolean;coins:number;stars:Record<string,number>;partner:DogId;bond:Record<string,number>;owned:string[];outfits:Record<string,string>;slots:(string|null)[];wall:string;floor:string;claimed:string[];daily:string[];clears:number;pets:number;session:Session|null;settings:{sound:boolean;music:boolean;reduced:boolean;symbols:boolean}};
@@ -78,6 +78,11 @@ export function readSave(raw:string|null):Save {
   try {
     const p=JSON.parse(raw) as Save;
     // Items that were removed from the game are dropped, not treated as a corrupt save.
+    if(Array.isArray(p?.owned)&&Array.isArray(p.slots)){
+      p.coins+=p.owned.reduce((sum,id)=>sum+(REFUNDED_ITEMS[id]??0),0);
+      p.owned=[...new Set(p.owned.map(id=>RENAMED_ITEMS[id]??id))];
+      p.slots=p.slots.map(id=>{const next=id&&(RENAMED_ITEMS[id]??id);return next&&p.owned.includes(next)&&ITEMS.some(i=>i.id===next)?next:null;});
+    }
     if(Array.isArray(p?.owned)&&p.outfits&&typeof p.outfits==='object'){p.owned=p.owned.filter(id=>ITEMS.some(i=>i.id===id));for(const [dog,id] of Object.entries(p.outfits))if(id&&!p.owned.includes(id))delete (p.outfits as Record<string,string>)[dog];}
     if(p.version!==2||!Number.isSafeInteger(p.coins)||p.coins<0||!p.stars||!Array.isArray(p.owned)||!Array.isArray(p.slots)||p.slots.length!==3||!p.bond||!p.settings||!Array.isArray(p.claimed)||!Array.isArray(p.daily))return newSave();
     if(typeof p.started!=='boolean'||!Number.isSafeInteger(p.clears)||p.clears<0||!Number.isSafeInteger(p.pets)||p.pets<0||!p.outfits||typeof p.outfits!=='object'||typeof p.wall!=='string'||typeof p.floor!=='string')return newSave();

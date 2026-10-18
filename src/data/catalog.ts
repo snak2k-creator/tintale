@@ -27,9 +27,8 @@ export const ITEMS = [
  {id:'wizard',name:'魔法使いの帽子',kind:'outfit',price:0,icon:'🪄'},
  {id:'tiara',name:'星のティアラ',kind:'outfit',price:0,icon:'✨'},
  {id:'bed',name:'ふかふかベッド',kind:'furniture',price:90,icon:'🛏️'},
- {id:'sofa',name:'小さなソファ',kind:'furniture',price:150,icon:'🛋️'},
+ {id:'tent',name:'わんこのテント',kind:'furniture',price:150,icon:'⛺'},
  {id:'cushion',name:'まあるいクッション',kind:'furniture',price:60,icon:'☁️'},
- {id:'rug',name:'花柄のカーペット',kind:'furniture',price:100,icon:'🌸'},
  {id:'table',name:'木のテーブル',kind:'furniture',price:110,icon:'🪑'},
  {id:'plant',name:'窓辺のグリーン',kind:'furniture',price:70,icon:'🪴'},
  {id:'plush',name:'くまのぬいぐるみ',kind:'furniture',price:80,icon:'🧸'},
@@ -42,10 +41,15 @@ export const ITEMS = [
  {id:'floor-oak',name:'オークの床',kind:'floor',price:100,icon:'🪵'},
  {id:'floor-herringbone',name:'ヘリンボーンの床',kind:'floor',price:120,icon:'🪵'},
  {id:'floor-checker',name:'市松もようの床',kind:'floor',price:120,icon:'▦'},
- {id:'floor-flower',name:'花模様の床',kind:'floor',price:140,icon:'🌼'},
+ {id:'floor-flower',name:'木の床に花柄のラグ',kind:'floor',price:140,icon:'🌼'},
+ {id:'floor-plaid',name:'木の床にチェックのラグ',kind:'floor',price:130,icon:'🧶'},
  {id:'floor-mint',name:'ミントタイルの床',kind:'floor',price:130,icon:'🟩'},
 ] as const;
 export const EXPRESSIONS=['通常','喜ぶ','笑う','驚く','困る','応援する','眠る','なでられる'] as const;
 
 /** Outfits that can't be bought: they are handed out by tier-clear missions. */
 export const REWARD_ONLY:readonly string[]=['cape','wizard','tiara'];
+
+/** Items that were taken out or swapped: old saves move to the replacement, or get the coins back. */
+export const RENAMED_ITEMS:Record<string,string>={sofa:'tent'};
+export const REFUNDED_ITEMS:Record<string,number>={rug:100};
