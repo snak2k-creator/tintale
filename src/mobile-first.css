@@ -109,6 +109,24 @@
 .floor-floor-mint .item-art { background: none; }
 .item-floor-mint { border: 1px solid #9fc4b1; border-radius: 6px; background-color: #d6efe2; background-image: repeating-linear-gradient(90deg, #8fb9a4 0 1px, transparent 1px 12px), repeating-linear-gradient(0deg, #8fb9a4 0 1px, transparent 1px 12px) !important; background-size: auto !important; }
 
+/* Outfits: each is a whole sheet of the eight dogs already wearing it, in the dogs.png layout. */
+.dog-sprite.wear-ribbon, .item-dog.wear-ribbon { background-image: url('/assets/outfits/ribbon.webp'); }
+.dog-sprite.wear-collar, .item-dog.wear-collar { background-image: url('/assets/outfits/collar.webp'); }
+.dog-sprite.wear-hat, .item-dog.wear-hat { background-image: url('/assets/outfits/hat.webp'); }
+.dog-sprite.wear-flower, .item-dog.wear-flower { background-image: url('/assets/outfits/flower.webp'); }
+.dog-sprite.wear-hoodie, .item-dog.wear-hoodie { background-image: url('/assets/outfits/hoodie.webp'); }
+.dog-sprite.wear-crown, .item-dog.wear-crown { background-image: url('/assets/outfits/crown.webp'); }
+.dog-sprite.wear-bowtie, .item-dog.wear-bowtie { background-image: url('/assets/outfits/bowtie.webp'); }
+.dog-sprite.wear-glasses, .item-dog.wear-glasses { background-image: url('/assets/outfits/glasses.webp'); }
+.dog-sprite.wear-scarf, .item-dog.wear-scarf { background-image: url('/assets/outfits/scarf.webp'); }
+.dog-sprite.wear-beret, .item-dog.wear-beret { background-image: url('/assets/outfits/beret.webp'); }
+.dog-sprite.wear-cape, .item-dog.wear-cape { background-image: url('/assets/outfits/cape.webp'); }
+.dog-sprite.wear-wizard, .item-dog.wear-wizard { background-image: url('/assets/outfits/wizard.webp'); }
+.dog-sprite.wear-tiara, .item-dog.wear-tiara { background-image: url('/assets/outfits/tiara.webp'); }
+/* Shop icon: the corgi wearing the outfit, zoomed so the outfit reads at icon size. */
+.item-sprite.item-dog { background-size: 500% auto; background-position: 34.4% 9.4%; }
+.mission-item { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #7a5ea8; background: #efe8fb; border-radius: 99px; padding: 3px 8px; }
+
 /* Stage select: one difficulty at a time. */
 .tier-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; margin-bottom: 14px; scrollbar-width: none; }
 .tier-tabs::-webkit-scrollbar { display: none; }
