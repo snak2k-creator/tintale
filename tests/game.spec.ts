@@ -46,6 +46,8 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await page.locator('.shop-item').filter({hasText:'ふかふかベッド'}).getByRole('button').click();
  await page.getByRole('button',{name:'90コインでお迎えする'}).click();
  await expect(page.locator('.placed-furniture')).toHaveCount(1);
+ // At most three dogs are out in the atelier.
+ await expect(page.locator('.customize-preview .room-dog')).toHaveCount(3);
  // Each wallpaper has its own swatch.
  await page.locator('.shop-tabs button').filter({hasText:'壁紙'}).click();
  const swatches=await page.locator('.shop-item .wall-swatch').evaluateAll(els=>els.map(e=>getComputedStyle(e).backgroundImage));
