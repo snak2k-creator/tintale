@@ -214,3 +214,42 @@
   .puzzle-companion p { display: none; }
   .puzzle-companion .text-button { grid-row: 2; }
 }
+
+/* One dog size per scene (`--dog`, % of the scene width); furniture is sized from it so a bed fits one dog. */
+.atelier-scene { --dog: 18; }
+.atelier-scene.compact { --dog: 19; }
+@media (max-width: 720px) { .atelier-scene { --dog: 24; } .atelier-scene.compact { --dog: 21; } }
+.atelier-scene .room-dog, .atelier-scene .room-dog:only-of-type { width: calc(var(--dog) * 1%); transition: left 3.4s cubic-bezier(.4,0,.6,1), top 3.4s cubic-bezier(.4,0,.6,1), filter .3s; }
+.room-dog.wander-1, .room-dog.wander-2, .room-dog.wander-3 { margin: 0; }
+/* A little trot while walking: hop, lean and swing, like paws stepping. */
+.room-dog.walking .dog-sprite { animation: trot .34s ease-in-out infinite alternate; transform-origin: 50% 90%; }
+@keyframes trot { 0% { transform: translateY(0) rotate(-3deg) scaleY(.97); } 100% { transform: translateY(-6%) rotate(3deg) scaleY(1.02); } }
+.room-dog.walking .dog-emote { display: none; }
+.room-dog.walking::after { content: ''; position: absolute; left: 22%; right: 22%; bottom: 1%; height: 7%; border-radius: 50%; background: #5b3a1a2e; animation: trot-shadow .34s ease-in-out infinite alternate; z-index: -1; }
+@keyframes trot-shadow { to { transform: scale(.8); opacity: .6; } }
+html[data-motion="reduced"] .room-dog { transition: none; }
+html[data-motion="reduced"] .room-dog.walking .dog-sprite { animation: none; }
+
+/* Floors follow the room's perspective and fade into the wall line instead of sitting on top as a flat band. */
+.atelier-scene[class*="floor-floor-"]::after { top: 61%; bottom: -12%; left: -35%; right: -35%; height: auto; transform-origin: 50% 0; transform: perspective(26cqw) rotateX(58deg); -webkit-mask-image: linear-gradient(transparent, #000 14%); mask-image: linear-gradient(transparent, #000 14%); }
+.atelier-scene.floor-floor-oak::after { background: repeating-linear-gradient(90deg, #8a6235 0 2px, #c4955e 2px 46px, #b5874f 46px 48px, #d0a46a 48px 92px); mix-blend-mode: multiply; opacity: .55; }
+.atelier-scene.floor-floor-herringbone::after { opacity: .9; }
+.atelier-scene.floor-floor-checker::after { background: conic-gradient(#6f4f33 25%, #f3e5c4 0 50%, #6f4f33 0 75%, #f3e5c4 0); background-size: 48px 48px; mix-blend-mode: multiply; opacity: .45; }
+.atelier-scene.floor-floor-flower::after { background-color: #f6e4c1; background-size: 40px 40px, 20px 20px; opacity: .85; }
+.atelier-scene.floor-floor-mint::after { background: linear-gradient(#a8dcc2, #a8dcc2), repeating-linear-gradient(90deg, #5f927a 0 2px, transparent 2px 44px), repeating-linear-gradient(0deg, #5f927a 0 2px, transparent 2px 44px); background-blend-mode: multiply; mix-blend-mode: multiply; opacity: .55; }
+
+/* The partner is bigger while playing. */
+@media (min-width: 1001px) {
+  .puzzle-layout { grid-template-columns: minmax(0, 1fr) 270px; }
+  .puzzle-companion > .dog-wrap { width: 250px; }
+}
+@media (min-width: 1001px) and (max-width: 1200px) {
+  .puzzle-layout { grid-template-columns: minmax(0, 1fr) 220px; }
+  .puzzle-companion > .dog-wrap { width: 210px; }
+}
+@media (max-width: 1000px) { .puzzle-companion > .dog-wrap { width: 130px; } .puzzle-companion .speech-bubble { font-size: 12px; } }
+@media (max-width: 720px) {
+  .puzzle-companion { grid-template-columns: 104px minmax(0, 1fr); }
+  .puzzle-companion > .dog-wrap { width: 104px; }
+  .puzzle-companion .speech-bubble { font-size: 12px; }
+}

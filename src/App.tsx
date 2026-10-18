@@ -4,7 +4,7 @@ import { Bottle, Dog, hideCovered, ItemArt, PourAnimation, POUR_MS, type PourPla
 import { DOGS, EXPRESSIONS, ITEMS, REWARD_ONLY, type DogId } from './data/catalog';
 import stages from './data/stages.json';
 import { buy, canPlay, claim, covers, dailyStage, equip, finish, jstDate, MISSIONS, moveSession, restartSession, readSave, savedRoute, startSession, undoSession, unlocked } from './game/progression';
-import { activity, FURNITURE_USE } from './game/atelier';
+import { activity, FURNITURE_USE, placeDogs, ROOM_LIMIT, ROOM_SPOTS } from './game/atelier';
 import { chime, music, pourSound } from './game/audio';
 import { useGame } from './game/store';
 import { pourAmount, solved, type Move } from './game/puzzle';
@@ -12,10 +12,10 @@ import { pourAmount, solved, type Move } from './game/puzzle';
 const TIERS=[...new Set(stages.map(s=>s.tier))];
 type View='home'|'puzzle'|'stages'|'friends'|'room'|'outfits'|'missions';
 type Result={stage:number;daily:boolean;moves:number;stars:number;coins:number;newDogs:DogId[]};
-/** Feet positions (in % of the scene) of the three furniture slots, all on the floor. */
-const SLOT_SPOTS=[{x:22,y:84},{x:50,y:95},{x:78,y:84}];
-/** A rug is wide, so keep it inside the scene. */
-const spotX=(slot:number,width:number)=>Math.min(100-width/2-1,Math.max(width/2+1,SLOT_SPOTS[slot].x));
+// Free floor first, so dogs start out walking around rather than all on the furniture.
+const SPOT_ORDER=[3,4,5,6,0,1,2],HOME_SPOT_ORDER=[4,3,6,5,0,1,2];
+/** A piece of furniture stays inside the scene; sizes are in units of the dog's width (`--dog`, % of the scene). */
+const furnitureLeft=(x:number,scale:number)=>`clamp(calc(var(--dog) * ${scale/2}% + 1%), ${x}%, calc(99% - var(--dog) * ${scale/2}%))`;
 const DIFFICULTIES=[['チュートリアル','ゆっくり練習'],['かんたん','まずは気軽に'],['ふつう','じっくり考える'],['むずかしい','手ごたえたっぷり'],['エキスパート','上級者向け'],['マスター','腕に自信がある人へ'],['ミステリー','ひみつの色を推理'],['レジェンド','いちばんの難関']] as const;
 const nav=[{id:'home',label:'アトリエ',icon:Home},{id:'stages',label:'パズル',icon:FlaskIcon},{id:'friends',label:'なかまたち',icon:PawPrint},{id:'room',label:'お部屋づくり',icon:LampDesk},{id:'outfits',label:'着せ替え',icon:Shirt},{id:'missions',label:'ミッション',icon:Trophy}] as const;
 function FlaskIcon({size=22}:{size?:number}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3h8M9 3v6l-5 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-9V3M7 15h10"/></svg>;}
@@ -33,6 +33,7 @@ export default function App(){
   const [selected,setSelected]=useState<number|null>(null),[bad,setBad]=useState<number|null>(null),[busy,setBusy]=useState(false),[stream,setStream]=useState<PourPlan|null>(null),[hint,setHint]=useState<Move|null>(null),[thinking,setThinking]=useState(false);
   const [toast,setToast]=useState(''),[result,setResult]=useState<Result|null>(null),[welcome,setWelcome]=useState<DogId|null>(null),[detail,setDetail]=useState<DogId|null>(null),[dressDog,setDressDog]=useState<DogId>(save.partner),[roomSlot,setRoomSlot]=useState(0),[shopTab,setShopTab]=useState('furniture'),[bookTab,setBookTab]=useState('friends');
   const [stageTier,setStageTier]=useState<string|null>(null),[confirmItem,setConfirmItem]=useState<string|null>(null);
+  const [placement,setPlacement]=useState<{home:Record<string,number>;room:Record<string,number>;walking:string[]}>({home:{},room:{},walking:[]});
   const [detailExpression,setDetailExpression]=useState(0),[pet,setPet]=useState<DogId|null>(null),[tick,setTick]=useState(0),[date,setDate]=useState(jstDate());
   const locked=useRef(false),timer=useRef<ReturnType<typeof setTimeout>|null>(null),hintWorker=useRef<Worker|null>(null),petTimes=useRef<Record<string,number>>({});
   const friends=unlocked(save),totalStars=Object.values(save.stars).reduce((a,b)=>a+b,0),completed=Object.keys(save.stars).length;
@@ -72,32 +73,32 @@ export default function App(){
   function touch(id:DogId){setPet(id);setTimeout(()=>setPet(null),1800);const d=DOGS.find(x=>x.id===id)!;setToast(`${d.name}は${(save.bond[id]??0)>=50?'とびきりうれしそう！':'うれしそうにしっぽを振った。'}`);if(Date.now()-(petTimes.current[id]??0)>8000){petTimes.current[id]=Date.now();update(s=>({...s,pets:s.pets+1,bond:{...s.bond,[id]:Math.min(100,(s.bond[id]??0)+1)}}));}if(save.settings.sound)chime();}
   function purchase(id:string){const item=ITEMS.find(x=>x.id===id)!;setConfirmItem(null);if(!save.owned.includes(id)){if(save.coins<item.price){setToast('コインが足りないみたい。パズルで集めよう！');return;}update(s=>buy(s,id));setToast(`${item.name}をお迎えしました。`);if(save.settings.sound)chime(true);}if(item.kind==='outfit')update(s=>equip(s,id,dressDog));else if(item.kind==='furniture')update(s=>{const slots=[...s.slots];slots[roomSlot]=id;return {...s,slots};});else if(item.kind==='wallpaper')update(s=>({...s,wall:id}));else update(s=>({...s,floor:id}));}
   type Room={slots:(string|null)[];wall:string;floor:string};
-  /** Where each dog stands, and which placed furniture it is using right now (changes every couple of ticks). */
-  const roomDogs=(home:boolean,room:Room,size:number)=>{
-    const shown=home?friends.filter(d=>d.id===save.partner):friends,phase=Math.floor(tick/2);
-    const placed=room.slots.map((id,slot)=>({id,slot})).filter((x):x is {id:string;slot:number}=>!!x.id&&!!FURNITURE_USE[x.id]);
-    const using=new Map<number,{id:string;slot:number}>();
-    if(home){if(placed.length&&phase%3!==0)using.set(0,placed[phase%placed.length]);}
-    else placed.forEach((p,k)=>{if((phase+p.slot)%4!==3)using.set((phase+k*3)%shown.length,p);});
-    return shown.map((d,i)=>{
-      const solo=shown.length===1,p=using.get(i);
-      if(p){const use=FURNITURE_USE[p.id],spot=SLOT_SPOTS[p.slot],w=size*(p.id==='rug'?1.9:1),cx=spotX(p.slot,w);
-        // Sit on the surface (seat × item height, in container-width units) or stand just beside the piece.
-        return {d,using:p.id,x:cx+(use.side??0)*w*.62,top:use.seat!==undefined?`calc(${spot.y-(p.id==='rug'?2:0)}% - ${(use.seat*w*.915).toFixed(2)}cqw)`:`${spot.y+1}%`,width:`${(size*use.size*(home?1.3:1)).toFixed(1)}%`,z:spot.y+(use.seat!==undefined?2:1)};}
-      const many=shown.length>4,y=solo?96:shown.length<=4?82:i<4?70:94;
-      return {d,using:null,x:solo?(home?64:57):11+(i%4)*24+(many&&i>=4?6:0),top:`${y}%`,width:solo?'var(--solo-dog-size,33%)':`${many?18:23}%`,z:y};
-    });
+  // The atelier shows the partner and at most two others (closest bond first).
+  const roomIds=[save.partner,...friends.filter(d=>d.id!==save.partner).sort((a,b)=>(save.bond[b.id]??0)-(save.bond[a.id]??0)).map(d=>d.id)].slice(0,ROOM_LIMIT);
+  const phase=Math.floor(tick/2);
+  useEffect(()=>{if(!phase)return;setPlacement(p=>{
+    const furnished=ROOM_SPOTS.flatMap((x,i)=>x.slot!==undefined&&save.slots[x.slot]&&FURNITURE_USE[save.slots[x.slot]!]?[i]:[]);
+    const home=placeDogs(placeDogs(p.home,[save.partner],HOME_SPOT_ORDER,-1),[save.partner],HOME_SPOT_ORDER,phase,furnished),before=placeDogs(p.room,roomIds,SPOT_ORDER,-1),room=placeDogs(before,roomIds,SPOT_ORDER,phase,furnished);
+    return {home,room,walking:[...roomIds.filter(id=>room[id]!==before[id]).map(id=>`room-${id}`),...(home[save.partner]!==p.home[save.partner]?[`home-${save.partner}`]:[])]};});
+    const t=setTimeout(()=>setPlacement(p=>({...p,walking:[]})),3600);return()=>clearTimeout(t);
+  },[phase]);
+  /** Each dog stands on its own spot; a spot holding furniture means the dog is using that piece. */
+  const roomDogs=(home:boolean,room:Room)=>{
+    const ids=home?[save.partner]:roomIds,map=placeDogs(home?placement.home:placement.room,ids,home?HOME_SPOT_ORDER:SPOT_ORDER,-1);
+    return ids.map(id=>{const d=DOGS.find(x=>x.id===id)!,spot=ROOM_SPOTS[map[id]],item=spot.slot!==undefined?room.slots[spot.slot]:null,use=item?FURNITURE_USE[item]:null;
+      if(item&&use)return {d,using:item,left:`calc(${furnitureLeft(spot.x,use.scale)} + var(--dog) * ${((use.side??0)*use.scale*.62).toFixed(2)}%)`,top:use.seat!==undefined?`calc(${spot.y}% - var(--dog) * ${(use.seat*use.scale*.915).toFixed(3)}cqw)`:`${spot.y+1}%`,z:spot.y+(use.seat!==undefined?2:1),walking:placement.walking.includes(`${home?'home':'room'}-${id}`)};
+      return {d,using:null,left:`${spot.x}%`,top:`${spot.y}%`,z:spot.y,walking:placement.walking.includes(`${home?'home':'room'}-${id}`)};});
   };
   function roomPreview(compact=false,override:Partial<Room>={},preview=false){
-    const room:Room={slots:save.slots,wall:save.wall,floor:save.floor,...override},size=compact?24:21,dogs=roomDogs(!compact,room,size);
+    const room:Room={slots:save.slots,wall:save.wall,floor:save.floor,...override},dogs=roomDogs(!compact,room);
     const caption=dogs.find(x=>x.d.id===partner.id);
     return <div className={`atelier-scene ${compact?'compact':''} ${preview?'preview':''} theme-${room.wall} floor-${room.floor}`}>
     <img className="room-art" src={`${import.meta.env.BASE_URL}assets/atelier.png`} alt="陽だまりと花に包まれた、小さな木のアトリエ"/>
     <div className="wall-pattern"/>
     {!preview&&<><div className="scene-label"><span className="live-dot"/> みんなのアトリエ</div><span className="sun-tag">☀ 陽だまりの時間</span></>}
-    {room.slots.map((id,i)=>id&&<span className={`placed-furniture furniture-${id}`} key={i} style={{left:`${spotX(i,size*(id==='rug'?1.9:1))}%`,top:`${SLOT_SPOTS[i].y}%`,width:`${size*(id==='rug'?1.9:1)}%`,zIndex:id==='rug'?5:SLOT_SPOTS[i].y}} title={ITEMS.find(x=>x.id===id)?.name}><ItemArt id={id}/></span>)}
-    {dogs.map(({d,x,top,width,z,using},i)=><button key={d.id} tabIndex={preview?-1:undefined} className={`room-dog wander-${using?0:(tick+i)%4} ${using?'on-furniture':''} ${pet===d.id?'petted':''}`} style={{left:`${x}%`,top,width,zIndex:Math.round(z)}} onClick={()=>touch(d.id)} aria-label={`${d.name}をなでる`}><Dog id={d.id} expression={pet===d.id?7:activity(save,d.id,tick,using).expression}/><span className="dog-name-tag">{d.name}</span></button>)}
-    {!compact&&<div className="scene-caption"><PawPrint size={14}/> {save.pets===0&&!caption?.using?`${partner.name}をタップして、なでてみよう。`:activity(save,partner.id,tick,caption?.using).action}</div>}
+    {room.slots.map((id,i)=>{if(!id)return null;const spot=ROOM_SPOTS.find(x=>x.slot===i)!,scale=FURNITURE_USE[id]?.scale??1;return <span className={`placed-furniture furniture-${id}`} key={i} style={{left:furnitureLeft(spot.x,scale),top:`${spot.y}%`,width:`calc(var(--dog) * ${scale}%)`,zIndex:id==='rug'?32:spot.y}} title={ITEMS.find(x=>x.id===id)?.name}><ItemArt id={id}/></span>;})}
+    {dogs.map(({d,left,top,z,using,walking})=><button key={d.id} tabIndex={preview?-1:undefined} className={`room-dog ${walking?'walking':''} ${using?'on-furniture':''} ${pet===d.id?'petted':''}`} style={{left,top,zIndex:Math.round(z)}} onClick={()=>touch(d.id)} aria-label={`${d.name}をなでる`}><Dog id={d.id} expression={pet===d.id?7:walking?0:activity(save,d.id,tick,using).expression}/><span className="dog-name-tag">{d.name}</span></button>)}
+    {!compact&&<div className="scene-caption"><PawPrint size={14}/> {caption?.walking?`${partner.name}はとことこお散歩中。`:save.pets===0&&!caption?.using?`${partner.name}をタップして、なでてみよう。`:activity(save,partner.id,tick,caption?.using).action}</div>}
     <div className="scene-vignette"/>
   </div>;}
   const names:Record<View,string>={home:'みんなのアトリエ',puzzle:'色をそろえる',stages:'パズル',friends:'なかまたち',room:'お部屋づくり',outfits:'着せ替え',missions:'ミッション'};
@@ -112,7 +113,7 @@ export default function App(){
       </section><aside className="home-side"><section className="daily-card"><div className="section-heading"><span className="eyebrow">TODAY'S LITTLE CHALLENGE</span><CalendarDays size={19}/></div><h2>きょうの色あそび</h2><p>1日ひとつの、とっておき。</p><div className="daily-bottles"><span className="daily-spark s1">✧</span><Bottle layers={[4,1,2,5]} index={0} decorative/><Bottle layers={[1,2,5,4]} index={1} decorative/><span className="daily-spark s2">✧</span></div><span className="reward-note"><Coins size={16}/> クリアで 50 コイン</span><Button secondary onClick={()=>play(dailyStage(date),date)}>{save.daily.includes(date)?'もう一度あそぶ':'チャレンジする'}<ArrowRight size={15}/></Button>{save.daily.includes(date)&&<small className="daily-done"><Check size={12}/> 今日の報酬は受け取り済み</small>}</section>
       <section className="next-friend"><span className="tiny-label">つぎの出会い</span>{(()=>{const d=DOGS.filter(d=>!friends.includes(d as typeof friends[number])).sort((a,b)=>a.stage-b.stage)[0];return d?<><div className="next-friend-body"><Dog id={d.id}/><div><h3>{d.name}</h3><p>{d.breed}</p><small>ステージ {d.stage} クリアで<br/>アトリエにやってくるよ。</small></div></div><div className="friend-progress"><Heart size={14}/><span>もうすこしで、新しいなかまに。</span></div></>:<><h3>8匹、みんなそろったね。</h3><p>いつでも、あなたのおうち。</p></>;})()}</section>
       </aside></div>
-      <div className="home-bottom"><button className="feature-link" onClick={()=>navigate('missions')}><span className="feature-icon peach"><Trophy size={26}/></span><div><h3>小さな達成を、集めよう。</h3><p>ミッションでうれしいごほうび。</p></div><ChevronRight size={19}/></button></div><p className="home-footnote"><Flower2 size={14}/> 急がなくて、大丈夫。あなたのペースで。</p>
+      <p className="home-footnote"><Flower2 size={14}/> 急がなくて、大丈夫。あなたのペースで。</p>
     </>}
     {view==='puzzle'&&session&&stage&&<div className="puzzle-page"><div className="page-intro"><div><p className="eyebrow">{session.daily?'DAILY CHALLENGE':'A MOMENT OF COLOR'}</p><h1>{session.daily?'きょうの色あそび':`ステージ ${session.stage}`}</h1><p>{stage.tier} · {stage.colors}色の小さなパズル{stage.hidden&&' · ひみつの色あり'}</p></div><button className="icon-button pause-button" onClick={()=>setPaused(true)} aria-label="一時停止"><Pause/></button></div><div className="puzzle-layout"><section className="puzzle-board"><div className="board-toolbar"><span><Sprout size={15}/> ひとつずつ、同じ色に。</span><span><b data-testid="moves">{session.moves}</b> 手 <span className="muted">/ 星3の目安 {stage.par}手</span></span></div>{stage.hidden&&session.history.length<3&&<div className="tutorial-note mystery-note"><Sparkles size={16}/><p><b>ひみつの色</b><br/>「？」の色は、上の色をほかの瓶へ注ぐと見えるようになるよ。</p></div>}{session.stage<=5&&!session.daily&&<div className="tutorial-note"><PawPrint size={16}/><p><b>ソラのワンポイント</b><br/>{selected===null?'まずは色の入った瓶をタップしてね。':'空の瓶か、てっぺんが同じ色の瓶を選ぼう。上でつながった分はまとめて注げるよ。'}</p></div>}<div className={`bottle-grid bottles-${session.board.length} ${busy?'pouring':''}`}>{session.board.map((b,i)=><Bottle key={i} layers={b} cover={cover[i]} index={i} selected={selected===i} receiving={stream?.to===i} pouring={stream?.from===i} hint={hint?.includes(i)} invalid={bad===i} disabled={busy||thinking} onClick={()=>tapBottle(i)} symbols={save.settings.symbols}/>)}</div><div className="board-help"><span className="little-dot"/> 瓶を選んで、注ぎたい瓶をタップ</div><div className="puzzle-controls"><button onClick={()=>{if(!locked.current&&!thinking){update(undoSession);setSelected(null);setHint(null);}}} disabled={!session.history.length||busy||thinking}><Undo2 size={21}/><span>もどす</span></button><button onClick={askHint} disabled={busy||thinking}><Lightbulb size={21}/><span>{thinking?'考え中…':'ヒント'}</span></button><button onClick={()=>setRestartConfirm(true)} disabled={busy||thinking}><RotateCcw size={21}/><span>やり直す</span></button></div></section><aside className="puzzle-companion"><div className="speech-bubble">{busy?'いい感じ、その調子♪':hint?'光っている瓶に注いでみてね。':`${partner.name}といっしょに、のんびり。`}</div><Dog id={save.partner} expression={busy?5:0}/><h3>{partner.name}</h3><p>時間はたっぷり。<br/>ゆっくり、色をそろえよう。</p><button className="text-button" onClick={()=>setHelp(true)}><CircleHelp size={15}/> あそびかた</button></aside></div></div>}
     {view==='puzzle'&&!session&&!result&&<div className="empty-state"><Dog id="sora"/><h1>どの色に、会いにいく？</h1><Button onClick={()=>navigate('stages')}>ステージを選ぶ</Button></div>}

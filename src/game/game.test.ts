@@ -2,6 +2,7 @@ import { describe,it,expect } from 'vitest';
 import stages from '../data/stages.json';
 import { DOGS, ITEMS } from '../data/catalog';
 import { cloneBoard,legal,pour,pourAmount,solved,solve, type Board } from './puzzle';
+import { placeDogs, ROOM_SPOTS } from './atelier';
 import { buy,claim,covers,dailyStage,MISSIONS,equip,finish,jstDate,moveSession,newSave,readSave,restartSession,rewardTotal,savedRoute,startSession,undoSession,unlocked, type Save } from './progression';
 const clearSave=(id=1,moves=999,daily:string|null=null):Save=>({...newSave(),session:{stage:id,daily,board:[[0,0,0,0],[1,1,1,1],[],[]],history:[],moves}});
 describe('grouped bottle pours',()=>{
@@ -36,6 +37,7 @@ describe('rewards, purchases, saving',()=>{
  it('only equips owned clothes onto unlocked dogs',()=>{const s={...newSave(),coins:200};expect(equip(s,'hat','sora')).toBe(s);const b=buy(s,'hat');expect(equip(b,'hat','chai')).toBe(b);expect(equip(b,'hat','sora').outfits.sora).toBe('hat');expect(equip(b,'plant','sora')).toBe(b);});
  it('tier missions hand out outfits that cannot be bought',()=>{const s={...newSave(),coins:999};expect(buy(s,'cape')).toBe(s);const stars=Object.fromEntries(stages.filter(x=>x.tier==='マスター').map(x=>[x.id,3]));const done=claim({...s,stars},'master');expect(done.owned).toContain('cape');expect(MISSIONS.find(m=>m.id==='master')!.target).toBe(15);expect(claim({...s,stars:{46:3}},'master')).toEqual({...s,stars:{46:3}});});
  it('drops outfits that no longer exist without losing the save',()=>{const s={...newSave(),coins:120,stars:{1:3},owned:['hat','old-cap'],outfits:{sora:'old-cap'}};const r=readSave(JSON.stringify(s));expect(r.coins).toBe(120);expect(r.owned).toEqual(['hat']);expect(r.outfits).toEqual({});});
+ it('dogs never share a spot, and only one walks at a time',()=>{const ids=['sora','leo','mil'],spots=ROOM_SPOTS.map((_,i)=>i);let map=placeDogs({},ids,spots,-1);for(let phase=1;phase<60;phase++){const next=placeDogs(map,ids,spots,phase,[0,1,2]);expect(new Set(Object.values(next)).size).toBe(3);expect(ids.filter(id=>next[id]!==map[id]).length).toBeLessThanOrEqual(1);map=next;}expect(Object.values(placeDogs({sora:2,leo:2},['sora','leo'],spots,-1))).toHaveLength(2);});
  it('the first stage of every difficulty is always open',()=>{const s={...newSave(),started:true};for(const id of [1,6,16,26,36,46,61,81])expect(startSession(s,id).session?.stage).toBe(id);expect(startSession(s,27)).toBe(s);});
  it('a chosen starting tier can be replayed',()=>{const s={...newSave(),started:true,stars:{36:3}};expect(startSession(s,36).session?.stage).toBe(36);expect(startSession(s,37).session?.stage).toBe(37);expect(startSession(s,38)).toBe(s);});
  it('mission rewards can only be claimed once',()=>{const s={...newSave(),clears:3};expect(claim(newSave(),'three').coins).toBe(0);const b=claim(s,'three');expect(b.coins).toBe(40);expect(claim(b,'three')).toBe(b);});
