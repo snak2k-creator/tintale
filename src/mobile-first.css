@@ -146,3 +146,71 @@
 .home-dog-picker button .dog-wrap { width: 46px; }
 .home-dog-picker button .dog-sprite { animation: none; }
 .home-dog-picker button.active { background: #eef1e8; border-color: #c9d4bd; color: #55664b; font-weight: 600; }
+
+/* Home: dress-up sits right under the play button. */
+.scene-actions { display: grid; gap: 8px; justify-items: stretch; }
+.scene-actions .dress-link { justify-content: center; }
+.scene-actions .dress-link svg:last-child { margin-left: auto; }
+.heading-links { display: inline-flex; gap: 14px; }
+.difficulty-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; font-size: 12px; color: #7f725d; }
+@media (max-width: 720px) {
+  .scene-actions { width: 100%; }
+  .heading-links { gap: 10px; }
+  .difficulty-bar { font-size: 11px; }
+  .difficulty-bar .button { flex: 0 0 auto; }
+}
+
+/* Room: everything stands on the floor, anchored at its feet, so furniture and dogs share one ground. */
+.atelier-scene { container-type: inline-size; }
+.room-dog { transform: translate(-50%, -96%); transition: left 4s ease-in-out, top 4s ease-in-out, width 4s ease-in-out, filter .3s; }
+.room-dog.on-furniture { margin: 0; }
+.atelier-scene.preview .room-dog { pointer-events: none; }
+.placed-furniture { aspect-ratio: 328 / 300; transform: translate(-50%, -96%); filter: sepia(.1) saturate(.9) brightness(.98) drop-shadow(0 2px 1px #6b48223d); transition: left .4s, top .4s; }
+/* Contact shadow, so the piece sits on the boards instead of floating. */
+.placed-furniture::before { content: ''; position: absolute; left: 6%; right: 6%; bottom: 3%; height: 18%; border-radius: 50%; background: radial-gradient(closest-side, #5b3a1a66, #5b3a1a26 60%, transparent); z-index: -1; }
+.placed-furniture.furniture-rug { opacity: 1; transform: translate(-50%, -88%) scaleY(.82); filter: sepia(.08) saturate(.88) brightness(.97); }
+.placed-furniture.furniture-rug::before { display: none; }
+.placed-furniture.furniture-plant::before, .placed-furniture.furniture-plush::before, .placed-furniture.furniture-toybox::before { left: 18%; right: 18%; }
+.placed-furniture .item-sprite { position: relative; }
+
+/* Wallpapers: each one gets its own pattern over the wall, and a matching swatch in the shop. */
+.wall-pattern { position: absolute; left: 0; right: 0; top: 0; height: 66%; pointer-events: none; z-index: 2; display: none; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.theme-wall-garden .wall-pattern, .theme-wall-girly .wall-pattern, .theme-wall-cafe .wall-pattern, .theme-wall-night .wall-pattern, .theme-wall-sakura .wall-pattern { display: block; }
+.theme-wall-garden .room-art { filter: hue-rotate(28deg) saturate(.95) brightness(1.02); }
+.theme-wall-girly .room-art { filter: hue-rotate(318deg) saturate(1.05) brightness(1.04); }
+.theme-wall-cafe .room-art { filter: sepia(.45) saturate(.85) brightness(.9); }
+.wall-swatch { border-radius: 6px; border: 1px solid #c8b28b; background-image: none; background-size: auto; background-repeat: repeat; }
+.theme-wall-garden .wall-pattern, .swatch-wall-garden { background-color: #e7f0d9; background-image: radial-gradient(ellipse 4px 7px at 9px 10px, #5f9a4f 0 98%, transparent), radial-gradient(ellipse 4px 7px at 25px 26px, #7cad5f 0 98%, transparent), repeating-linear-gradient(90deg, #6a9a5a55 0 2px, transparent 2px 32px); background-size: 32px 32px, 32px 32px, auto; }
+.theme-wall-garden .wall-pattern { mix-blend-mode: multiply; opacity: .26; }
+.theme-wall-girly .wall-pattern, .swatch-wall-girly { background-color: #fbe3ea; background-image: radial-gradient(circle at 8px 8px, #ef8fb0 0 3px, transparent 3.5px), radial-gradient(circle at 24px 24px, #f6b5c9 0 4px, transparent 4.5px), radial-gradient(circle at 24px 24px, #fff6c9 0 1.5px, transparent 2px); background-size: 32px 32px; }
+.theme-wall-girly .wall-pattern { mix-blend-mode: multiply; opacity: .4; }
+.theme-wall-cafe .wall-pattern, .swatch-wall-cafe { background-color: #f1e2c8; background-image: repeating-linear-gradient(90deg, #9a6a43 0 12px, #f4e6cc 12px 24px); }
+.theme-wall-cafe .wall-pattern { mix-blend-mode: multiply; opacity: .28; }
+.theme-wall-night .wall-pattern, .swatch-wall-night { background-color: #2f3a6b; background-image: radial-gradient(circle at 6px 9px, #fff8d6 0 1.3px, transparent 2px), radial-gradient(circle at 22px 25px, #fff 0 1px, transparent 1.6px), radial-gradient(circle at 27px 7px, #ffe69a 0 1.8px, transparent 2.4px); background-size: 32px 32px; }
+.theme-wall-night .wall-pattern { mix-blend-mode: screen; opacity: .55; background-color: transparent; }
+.theme-wall-sakura .wall-pattern, .swatch-wall-sakura { background-color: #fdeef1; background-image: radial-gradient(ellipse 5px 3px at 9px 12px, #f2a6b8 0 98%, transparent), radial-gradient(ellipse 3px 5px at 26px 22px, #f7c1cd 0 98%, transparent), radial-gradient(ellipse 4px 3px at 18px 30px, #eb98ad 0 98%, transparent); background-size: 34px 34px; }
+.theme-wall-sakura .wall-pattern { mix-blend-mode: multiply; opacity: .45; }
+.item-wall-night, .item-wall-sakura { filter: none; }
+
+/* Buying: preview first, then confirm. */
+.buy-preview { border-radius: 14px; overflow: hidden; border: 1px solid #e8dfcd; margin: 4px 0 10px; }
+.buy-preview .dress-preview { min-height: 230px; }
+.buy-preview .dress-preview .dog-wrap { width: 160px; }
+.buy-name { text-align: center; font-size: 16px; color: #665340; margin: 6px 0 2px; }
+.shop-item button.short { color: #a99a80; }
+
+/* The partner stays in view while playing: beside the board on wide screens, above it otherwise. */
+@media (min-width: 1001px) {
+  .puzzle-layout { align-items: start; }
+  .puzzle-companion { position: sticky; top: 18px; padding-top: 70px; }
+}
+@media (max-width: 1000px) {
+  .puzzle-companion { order: -1; padding-top: 0; }
+  .puzzle-companion > .dog-wrap { width: 70px; }
+}
+@media (max-width: 720px) {
+  .puzzle-companion { order: -1; padding: 6px 12px; }
+  .puzzle-companion > .dog-wrap { width: 58px; }
+  .puzzle-companion p { display: none; }
+  .puzzle-companion .text-button { grid-row: 2; }
+}

@@ -11,12 +11,14 @@ export function covers(s:Session):number[] {
   if(!stages[s.stage-1]?.hidden)return s.board.map(()=>0);
   return s.board.map((_,i)=>Math.max(0,Math.min(...[...s.history,s.board].map(b=>b[i].length))-1));
 }
+/** First stage of each difficulty tier. These are always open, so any difficulty can be chosen at any time. */
+export const TIER_STARTS:number[]=[...new Set(stages.map(x=>x.tier))].map(t=>stages.find(x=>x.tier===t)!.id);
+export const canPlay=(s:Save,stage:number)=>stage===1||TIER_STARTS.includes(stage)||!!s.stars[stage-1]||!!s.stars[stage];
 export const unlocked = (s:Save) => DOGS.filter(d=>d.stage===0 || !!s.stars[d.stage]);
 export const rewardTotal = (stars:number):number => stars>=3?60:stars===2?40:stars===1?30:0;
 export function startSession(s:Save,stage:number,daily:string|null=null):Save {
   const data=stages[stage-1];if(!data)return s;
-  // First-time players may choose a starting tier; later stages still follow normal unlocks.
-  if(!daily && stage>1 && !s.stars[stage-1] && !s.stars[stage] && s.started)return s;
+  if(!daily && !canPlay(s,stage))return s;
   return {...s,started:true,session:{stage,daily,board:cloneBoard(data.board),history:[],moves:0}};
 }
 export function moveSession(s:Save,from:number,to:number):Save {

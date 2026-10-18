@@ -39,16 +39,30 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await page.screenshot({path:`test-results/eight-dogs-${info.project.name}.png`,fullPage:true});
  // The room has a single entry point: the navigation.
  await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:info.project.name==='mobile'?'お部屋':'お部屋づくり',exact:true}).click();
+ // Buying shows a preview with the piece placed, and only spends coins after confirming.
  await page.locator('.shop-item').filter({hasText:'ふかふかベッド'}).getByRole('button').click();
+ await expect(page.getByRole('dialog').locator('.placed-furniture.furniture-bed')).toHaveCount(1);
+ await page.getByRole('button',{name:'やめておく'}).click();await expect(page.locator('.placed-furniture')).toHaveCount(0);
+ await page.locator('.shop-item').filter({hasText:'ふかふかベッド'}).getByRole('button').click();
+ await page.getByRole('button',{name:'90コインでお迎えする'}).click();
  await expect(page.locator('.placed-furniture')).toHaveCount(1);
+ // Each wallpaper has its own swatch.
+ await page.locator('.shop-tabs button').filter({hasText:'壁紙'}).click();
+ const swatches=await page.locator('.shop-item .wall-swatch').evaluateAll(els=>els.map(e=>getComputedStyle(e).backgroundImage));
+ expect(new Set(swatches).size).toBe(swatches.length);
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'閉じる',exact:true}).click();
  // Album detail exposes a real partner selector.
  await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:info.project.name==='mobile'?'なかま':'なかまたち',exact:true}).click();
+ await expect(page.locator('.sidebar, .mobile-nav').getByRole('button',{name:'コレクション'})).toHaveCount(0);
+ await page.getByRole('tab',{name:'家具'}).click();await expect(page.locator('.collection-item').filter({hasText:'ふかふかベッド'})).not.toHaveClass(/unowned/);
+ await page.getByRole('tab',{name:'なかま'}).click();
  await page.locator('.dog-card').filter({hasText:'レオ'}).click();await expect(page.locator('.detail-content>p').first()).toHaveText('コーギー');
  await page.getByRole('button',{name:'パートナーにする'}).click();
  await page.locator('.dog-card').filter({hasText:'レオ'}).click();
  await page.getByRole('button',{name:'着せ替える',exact:false}).click();
  await page.locator('.shop-item').filter({hasText:'麦わら帽子'}).getByRole('button').click();
+ await expect(page.getByRole('dialog').locator('.dog-sprite.wear-hat')).toBeVisible();
+ await page.getByRole('button',{name:'90コインでお迎えする'}).click();
  await expect(page.locator('.dress-preview .dog-sprite.wear-hat')).toBeVisible();
  await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:'ミッション',exact:true}).click();
  await page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button').click();
@@ -78,4 +92,15 @@ test('rapid taps preserve four units of each color; pause blocks board',async({p
  await expect(page.locator('.pouring')).toHaveCount(0);
  const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('tintale.save.v2')!));for(let c=0;c<2;c++)expect(s.session.board.flat().filter((x:number)=>x===c)).toHaveLength(4);
  await page.getByRole('button',{name:'一時停止'}).click();await expect(page.getByRole('dialog',{name:''})).toBeVisible();await page.getByRole('button',{name:'つづける',exact:true}).click();await expect(page.getByTestId('moves')).toHaveText('1');
+});
+test('any difficulty can be chosen at any time, and dress-up sits under the play button',async({page},info)=>{
+ await page.goto('/');await page.evaluate(()=>{localStorage.setItem('tintale.save.v2',JSON.stringify({version:2,started:true,coins:0,stars:{'1':3},partner:'sora',bond:{sora:0},owned:[],outfits:{},slots:[null,null,null],wall:'natural',floor:'natural',claimed:[],daily:[],clears:1,pets:0,session:null,settings:{sound:false,music:false,reduced:true,symbols:false}}));});await page.reload();
+ const play=await page.getByRole('button',{name:/パズルで遊ぶ/}).boundingBox(),dress=await page.locator('.scene-actions').getByRole('button',{name:'着せ替え'}).boundingBox();
+ expect(dress!.y).toBeGreaterThan(play!.y+play!.height-1);expect(Math.abs(dress!.x-play!.x)).toBeLessThan(2);
+ await page.getByRole('button',{name:/難易度をえらぶ/}).first().click();
+ await page.getByRole('button',{name:/^エキスパート/}).click();
+ await expect(page.getByRole('heading',{name:'ステージ 36'})).toBeVisible();
+ // The partner is fully on screen while playing.
+ const dog=await page.locator('.puzzle-companion .dog-wrap').boundingBox(),vp=page.viewportSize()!;
+ expect(dog!.y).toBeGreaterThanOrEqual(0);expect(dog!.y+dog!.height).toBeLessThanOrEqual(vp.height-(info.project.name==='mobile'?70:0));
 });
