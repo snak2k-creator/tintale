@@ -5,9 +5,9 @@ import { useGame } from './game/store';
 export function Dog({id,className='',expression=0}:{id:DogId;className?:string;expression?:number}) {
   const save=useGame(s=>s.save),d=DOGS.find(x=>x.id===id)!;
   const outfit=ITEMS.find(x=>x.id===save.outfits[id]);
-  return <span className={`dog-wrap expression-${expression} ${className}`} role="img" aria-label={`${d.name}（${d.breed}）${expression===6?'・お昼寝中':''}`}><span className="dog-sprite" style={{backgroundPosition:`${(d.index%4)*100/3}% ${Math.floor(d.index/4)*100}%`}}/>{outfit&&<span className={`dog-outfit outfit-${outfit.id} breed-${d.id}`} aria-label={outfit.name}><ItemArt id={outfit.id}/></span>}{expression>0&&<span className="dog-emote">{['','♥','♪','!','…','✦','z z','♡'][expression]}</span>}</span>;
+  return <span className={`dog-wrap expression-${expression} ${className}`} role="img" aria-label={`${d.name}（${d.breed}）${outfit?`・${outfit.name}`:''}${expression===6?'・お昼寝中':''}`}><span className={`dog-sprite${outfit?` wear-${outfit.id}`:''}`} style={{backgroundPosition:`${(d.index%4)*100/3}% ${Math.floor(d.index/4)*100}%`}}/>{expression>0&&<span className="dog-emote">{['','♥','♪','!','…','✦','z z','♡'][expression]}</span>}</span>;
 }
-export function ItemArt({id}:{id:string}){const i=['ribbon','collar','hat','flower','hoodie','crown','bed','sofa','cushion','rug','table','plant','plush','toybox','wall-garden','floor-oak'].indexOf(id);const index=i<0?14:i;return <span className={`item-sprite item-${id}`} aria-hidden="true" style={{backgroundPosition:`${index%4*100/3}% ${Math.floor(index/4)*100/3}%`}}/>;}
+export function ItemArt({id}:{id:string}){if(ITEMS.some(x=>x.id===id&&x.kind==='outfit'))return <span className={`item-sprite item-dog wear-${id}`} aria-hidden="true"/>;const i=['ribbon','collar','hat','flower','hoodie','crown','bed','sofa','cushion','rug','table','plant','plush','toybox','wall-garden','floor-oak'].indexOf(id);const index=i<0?14:i;return <span className={`item-sprite item-${id}`} aria-hidden="true" style={{backgroundPosition:`${index%4*100/3}% ${Math.floor(index/4)*100/3}%`}}/>;}
 const BOTTLE_OUTLINE=[[27,12],[53,12],[53,37],[61,50],[67,67],[67,146],[63,156],[55,158],[25,158],[17,156],[13,146],[13,67],[19,50],[27,37]];
 export type LiquidBand={color:number;units:number};
 /** Fill for colors that are still hidden on mystery stages. */

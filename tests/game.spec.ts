@@ -49,7 +49,7 @@ test('8 dogs, partner, furniture, outfit, missions and persisted customization',
  await page.locator('.dog-card').filter({hasText:'レオ'}).click();
  await page.getByRole('button',{name:'着せ替える',exact:false}).click();
  await page.locator('.shop-item').filter({hasText:'麦わら帽子'}).getByRole('button').click();
- await expect(page.locator('.dress-preview .outfit-hat')).toBeVisible();
+ await expect(page.locator('.dress-preview .dog-sprite.wear-hat')).toBeVisible();
  await page.locator(info.project.name==='mobile'?'.mobile-nav':'.sidebar').getByRole('button',{name:'ミッション',exact:true}).click();
  await page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button').click();
  await expect(page.locator('.mission-card').filter({hasText:'小さな一歩を、3回'}).getByRole('button')).toBeDisabled();

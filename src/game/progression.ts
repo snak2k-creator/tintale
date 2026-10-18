@@ -1,5 +1,5 @@
 import stages from '../data/stages.json';
-import { DOGS, ITEMS, type DogId } from '../data/catalog';
+import { DOGS, ITEMS, REWARD_ONLY, type DogId } from '../data/catalog';
 import { cloneBoard, pour, solved, type Board, type Move } from './puzzle';
 export type Session = {stage:number;daily:string|null;board:Board;history:Board[];moves:number};
 export type Save = {version:2;started:boolean;coins:number;stars:Record<string,number>;partner:DogId;bond:Record<string,number>;owned:string[];outfits:Record<string,string>;slots:(string|null)[];wall:string;floor:string;claimed:string[];daily:string[];clears:number;pets:number;session:Session|null;settings:{sound:boolean;music:boolean;reduced:boolean;symbols:boolean}};
@@ -44,7 +44,7 @@ export function finish(s:Save):{save:Save;stars:number;coins:number;newDogs:DogI
   return {save:next,stars:rating,coins,newDogs};
 }
 export function buy(s:Save,id:string):Save {
-  const item=ITEMS.find(x=>x.id===id);if(!item||s.owned.includes(id)||s.coins<item.price)return s;
+  const item=ITEMS.find(x=>x.id===id);if(!item||REWARD_ONLY.includes(id)||s.owned.includes(id)||s.coins<item.price)return s;
   const bond={...s.bond};if(item.kind==='furniture')for(const dog of unlocked(s))bond[dog.id]=Math.min(100,(bond[dog.id]??0)+2);
   return {...s,coins:s.coins-item.price,owned:[...s.owned,id],bond};
 }
@@ -63,12 +63,13 @@ export const MISSIONS=[
  {id:'pet',name:'やさしい手のひら',text:'仲間に10回ふれあう',target:10,reward:40,value:(s:Save)=>s.pets},
  {id:'clear50',name:'色の旅人',text:'50ステージをクリアする',target:50,reward:150,value:(s:Save)=>Object.keys(s.stars).length},
  {id:'stars150',name:'星あつめの名人',text:'星を150個あつめる',target:150,reward:200,value:(s:Save)=>Object.values(s.stars).reduce((a,b)=>a+b,0)},
- ...(['マスター','ミステリー','レジェンド'] as const).map((tier,k)=>{const ids=stages.filter(x=>x.tier===tier).map(x=>x.id);return {id:['master','mystery','legend'][k],name:`${tier}制覇`,text:`${tier}の${ids.length}ステージをすべてクリアする`,target:ids.length,reward:[150,200,300][k],value:(s:Save)=>ids.filter(i=>s.stars[i]).length};}),
+ ...([['master','マスター','ヒーローマント','cape'],['mystery','ミステリー','魔法使いの帽子','wizard'],['legend','レジェンド','星のティアラ','tiara']] as const).map(([id,tier,name,item])=>{const ids=stages.filter(x=>x.tier===tier).map(x=>x.id);return {id,name:`${tier}制覇`,text:`${tier}の${ids.length}ステージをすべてクリアする`,target:ids.length,reward:100,item,itemName:name,value:(s:Save)=>ids.filter(i=>s.stars[i]).length};}),
  {id:'clear100',name:'100の色をそろえて',text:'100ステージすべてをクリアする',target:100,reward:500,value:(s:Save)=>Object.keys(s.stars).length},
 ];
 export function claim(s:Save,id:string):Save {
   const m=MISSIONS.find(x=>x.id===id);if(!m||s.claimed.includes(id)||m.value(s)<m.target)return s;
-  return {...s,coins:s.coins+m.reward,claimed:[...s.claimed,id],bond:{...s.bond,[s.partner]:Math.min(100,(s.bond[s.partner]??0)+3)}};
+  const item='item' in m?m.item:null;
+  return {...s,coins:s.coins+m.reward,claimed:[...s.claimed,id],owned:item&&!s.owned.includes(item)?[...s.owned,item]:s.owned,bond:{...s.bond,[s.partner]:Math.min(100,(s.bond[s.partner]??0)+3)}};
 }
 export function readSave(raw:string|null):Save {
   if(!raw)return newSave();
