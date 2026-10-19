@@ -109,3 +109,21 @@ test('any difficulty can be chosen at any time, and dress-up sits under the play
  const dog=await page.locator('.puzzle-companion .dog-wrap').boundingBox(),vp=page.viewportSize()!;
  expect(dog!.y).toBeGreaterThanOrEqual(0);expect(dog!.y+dog!.height).toBeLessThanOrEqual(vp.height-(info.project.name==='mobile'?70:0));
 });
+test('mystery hides a scattered pick of colors, and legend limits hints and undos',async({page},info)=>{
+ await page.goto('/');await page.evaluate(()=>{localStorage.setItem('tintale.save.v2',JSON.stringify({version:2,started:true,coins:0,stars:{'1':3},partner:'sora',bond:{sora:0},owned:[],outfits:{},slots:[null,null,null],wall:'natural',floor:'natural',claimed:[],daily:[],clears:1,pets:0,session:null,settings:{sound:false,music:false,reduced:true,symbols:false}}));});await page.reload();
+ await page.getByRole('button',{name:/難易度をえらぶ/}).first().click();
+ await page.getByRole('button',{name:/^ミステリー/}).click();
+ await expect(page.getByRole('heading',{name:'ステージ 61'})).toBeVisible();
+ // Some units under the tops stay visible instead of the whole column being "?".
+ const labels=await page.locator('.bottle-grid .bottle').evaluateAll(els=>els.map(e=>e.getAttribute('aria-label')!.replace(/^瓶\d+：/,'').split('、')));
+ const under=labels.flatMap(l=>l.length>1?l.slice(0,-1):[]);expect(under.filter(x=>x==='ひみつ').length).toBeGreaterThan(0);expect(under.filter(x=>x!=='ひみつ').length).toBeGreaterThan(0);
+ await expect(page.getByTestId('hints-left')).toHaveCount(0);
+ await page.screenshot({path:info.outputPath('mystery.png')});
+ await page.evaluate(()=>{localStorage.setItem('tintale.save.v2',JSON.stringify({version:2,started:true,coins:0,stars:{'1':3},partner:'sora',bond:{sora:0},owned:[],outfits:{},slots:[null,null,null],wall:'natural',floor:'natural',claimed:[],daily:[],clears:1,pets:0,session:null,settings:{sound:false,music:false,reduced:true,symbols:false}}));});await page.reload();await page.getByRole('button',{name:/難易度をえらぶ/}).first().click();
+ await page.getByRole('button',{name:/^レジェンド/}).click();
+ await expect(page.getByRole('heading',{name:'ステージ 81'})).toBeVisible();
+ await expect(page.getByTestId('hints-left')).toHaveText(/あと1/);await expect(page.getByTestId('undos-left')).toHaveText(/あと3/);
+ await page.screenshot({path:info.outputPath('legend.png')});
+ await page.getByRole('button',{name:/ヒント/}).click();
+ await expect(page.getByRole('button',{name:/ヒント/})).toBeDisabled();await expect(page.getByTestId('hints-left')).toHaveText(/あと0/);
+});

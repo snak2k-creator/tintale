@@ -1,16 +1,24 @@
 import stages from '../data/stages.json';
 import { DOGS, ITEMS, REFUNDED_ITEMS, RENAMED_ITEMS, REWARD_ONLY, type DogId } from '../data/catalog';
 import { cloneBoard, pour, solved, type Board, type Move } from './puzzle';
-export type Session = {stage:number;daily:string|null;board:Board;history:Board[];moves:number};
+export type Session = {stage:number;daily:string|null;board:Board;history:Board[];moves:number;hints?:number;undos?:number};
 export type Save = {version:2;started:boolean;coins:number;stars:Record<string,number>;partner:DogId;bond:Record<string,number>;owned:string[];outfits:Record<string,string>;slots:(string|null)[];wall:string;floor:string;claimed:string[];daily:string[];clears:number;pets:number;session:Session|null;settings:{sound:boolean;music:boolean;reduced:boolean;symbols:boolean}};
 export const newSave = ():Save => ({version:2,started:false,coins:0,stars:{},partner:'sora',bond:{sora:0},owned:[],outfits:{},slots:[null,null,null],wall:'natural',floor:'natural',claimed:[],daily:[],clears:0,pets:0,session:null,settings:{sound:true,music:false,reduced:false,symbols:false}});
 export const jstDate = (date=new Date()):string => new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
 export const dailyStage = (date:string):number => 16 + ([...date].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,17)%80);
-/** On hidden-color stages, how many bottom units of each bottle have never been on top (and so stay hidden). */
-export function covers(s:Session):number[] {
-  if(!stages[s.stage-1]?.hidden)return s.board.map(()=>0);
-  return s.board.map((_,i)=>Math.max(0,Math.min(...[...s.history,s.board].map(b=>b[i].length))-1));
+/** Hidden-color stages hide a scattered pick of the units under each top; レジェンド also caps hints and undos per play. */
+export const HIDE_RATE:Record<string,number>={'ミステリー':.45,'レジェンド':.55};
+export const LIMITS:Record<string,{hints:number;undos:number}>={'レジェンド':{hints:1,undos:3}};
+export const limitsFor=(stage:number)=>LIMITS[stages[stage-1]?.tier??'']??null;
+const scatter=(stage:number,bottle:number,unit:number)=>((Math.imul(stage*7919+bottle*104729+unit*1299709,2654435761)>>>0)%1000)/1000;
+/** On hidden-color stages, which units of each bottle are drawn as "?": a scattered pick of the bottom units that have never been on top. */
+export function covers(s:Session):boolean[][] {
+  const data=stages[s.stage-1],rate=data?.hidden?HIDE_RATE[data.tier]??.5:0;
+  return s.board.map((b,i)=>{const depth=rate?Math.max(0,Math.min(...[...s.history,s.board].map(x=>x[i].length))-1):0;return b.map((_,j)=>j<depth&&scatter(s.stage,i,j)<rate);});
 }
+export const hintsLeft=(s:Session)=>{const l=limitsFor(s.stage);return l?Math.max(0,l.hints-(s.hints??0)):Infinity;};
+export const undosLeft=(s:Session)=>{const l=limitsFor(s.stage);return l?Math.max(0,l.undos-(s.undos??0)):Infinity;};
+export function spendHint(s:Save):Save {const p=s.session;if(!p||!limitsFor(p.stage)||!hintsLeft(p))return s;return {...s,session:{...p,hints:(p.hints??0)+1}};}
 /** First stage of each difficulty tier. These are always open, so any difficulty can be chosen at any time. */
 export const TIER_STARTS:number[]=[...new Set(stages.map(x=>x.tier))].map(t=>stages.find(x=>x.tier===t)!.id);
 export const canPlay=(s:Save,stage:number)=>stage===1||TIER_STARTS.includes(stage)||!!s.stars[stage-1]||!!s.stars[stage];
@@ -27,12 +35,12 @@ export function moveSession(s:Save,from:number,to:number):Save {
   return {...s,session:{...p,board:b,history:[...p.history,cloneBoard(p.board)],moves:p.moves+1}};
 }
 export function undoSession(s:Save):Save {
-  const p=s.session;if(!p?.history.length)return s;
-  return {...s,session:{...p,board:cloneBoard(p.history.at(-1)!),history:p.history.slice(0,-1),moves:p.moves-1}};
+  const p=s.session;if(!p?.history.length||!undosLeft(p))return s;
+  return {...s,session:{...p,board:cloneBoard(p.history.at(-1)!),history:p.history.slice(0,-1),moves:p.moves-1,undos:(p.undos??0)+(limitsFor(p.stage)?1:0)}};
 }
 export function restartSession(s:Save):Save {
   const p=s.session;if(!p)return s;
-  return {...s,session:{...p,board:cloneBoard(stages[p.stage-1].board),history:[],moves:0}};
+  return {...s,session:{...p,board:cloneBoard(stages[p.stage-1].board),history:[],moves:0,...(p.undos?{undos:0}:{})}};
 }
 export function finish(s:Save):{save:Save;stars:number;coins:number;newDogs:DogId[]} | null {
   const p=s.session;if(!p||!solved(p.board))return null;
@@ -92,7 +100,7 @@ export function readSave(raw:string|null):Save {
     if(!unlocked(next).some(x=>x.id===next.partner))next.partner='sora';
     if(next.session){
       const ss=next.session,stage=stages[ss.stage-1];
-      if(!stage||!Number.isInteger(ss.stage)||!(ss.daily===null||typeof ss.daily==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(ss.daily))||!Array.isArray(ss.history)||!Number.isInteger(ss.moves)||ss.moves<0||ss.moves!==ss.history.length)next.session=null;
+      if(!stage||!Number.isInteger(ss.stage)||!(ss.daily===null||typeof ss.daily==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(ss.daily))||!Array.isArray(ss.history)||!Number.isInteger(ss.moves)||ss.moves<0||ss.moves!==ss.history.length||[ss.hints,ss.undos].some(n=>n!==undefined&&(!Number.isInteger(n)||n<0)))next.session=null;
       else {
         const valid=(b:Board)=>Array.isArray(b)&&b.length===stage.board.length&&b.every(x=>Array.isArray(x)&&x.length<=4&&x.every(c=>Number.isInteger(c)&&c>=0&&c<stage.colors))&&Array.from({length:stage.colors},(_,c)=>b.flat().filter(x=>x===c).length).every(n=>n===4);
         if(!valid(ss.board)||!ss.history.every(valid))next.session=null;
